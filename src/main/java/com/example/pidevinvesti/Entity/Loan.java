@@ -18,6 +18,6 @@ public class Loan {
     private Float InterestRate;
     private Date DateDebut ;
 
-   // @OneToOne(mappedBy = "loan")
-    //private Demand demand ;
+    @OneToOne(mappedBy = "loan")
+    private Demand demand ;
 }

@@ -15,5 +15,4 @@ public class Collateral {
     private long CollateralId ;
     private String Type ;
     private String Value ;
-
 }
