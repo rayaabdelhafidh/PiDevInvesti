@@ -2,6 +2,7 @@ package com.example.investi.Controllers;
 
 import com.example.investi.Entities.Account;
 import com.example.investi.Entities.AccountType;
+import com.example.investi.Entities.Project;
 import com.example.investi.Services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,14 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    @PostMapping("/create/{clientId}/{accountType}")
+    @PostMapping("/create/{accountType}")
     public ResponseEntity<Account> createAccount(
             @RequestBody Account account,
-            @PathVariable Long clientId,
-            @PathVariable String accountType) {
+            @RequestParam(required = false) Long clientId, // Optional for Project accounts
+            @PathVariable String accountType,
+            @RequestParam(required = false) Long project) { // Required only for Project accounts
 
-        // Convert accountType string to enum
+        // Normalize the accountType string to match enum format
         String normalizedAccountType = accountType.substring(0, 1).toUpperCase() + accountType.substring(1).toLowerCase();
 
         // Convert accountType string to enum
@@ -33,10 +35,17 @@ public class AccountController {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid account type: " + accountType);
         }
-        // Create the account
-        Account createdAccount = accountService.createAccount(account, clientId, type);
+
+        // Validate that a Project is provided for Project accounts
+        if (type == AccountType.Project && project == null) {
+            throw new RuntimeException("A Project must be provided for a Project account.");
+        }
+
+        // Call the service to create the account
+        Account createdAccount = accountService.createAccount(account, clientId, type, project);
         return ResponseEntity.ok(createdAccount);
     }
+
 
     @GetMapping("/list")
     public ResponseEntity<List<Account>> listAccounts(
@@ -59,10 +68,11 @@ public class AccountController {
     public ResponseEntity<Account> updateAccount(
             @PathVariable Long accountId,
             @RequestBody Account updatedAccount,
-            @RequestParam(required = false) Long clientId) {
+            @RequestParam(required = false) Long clientId,
+            @RequestParam(required = false) Long ProjectId) {
 
         // Call the service to update the account
-        Account updated = accountService.updateAccount(accountId, updatedAccount, clientId);
+        Account updated = accountService.updateAccount(accountId, updatedAccount, clientId,ProjectId);
         return ResponseEntity.ok(updated);
     }
     @DeleteMapping("/delete/{accountId}")

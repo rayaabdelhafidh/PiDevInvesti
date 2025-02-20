@@ -18,4 +18,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByClientIdAndAccountType(@Param("clientId") Long clientId, @Param("accountType") AccountType accountType);
 
     List<Account> findByClientIdUser(Long clientId);
+
+
 }
