@@ -1,5 +1,6 @@
 package com.example.pidevinvesti.Entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,10 +17,13 @@ public class Demand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long DemandId;
+    @JsonProperty("Amount")
     private float Amount ;
-    private float IntrestRate ;
+    @JsonProperty("Duration")
     private int Duration ;
+    @JsonProperty("DemandDate")
     private Date DemandDate ;
+    @JsonProperty("Status")
     @Enumerated(EnumType.STRING)
     private DemandStatus Status;
    @OneToOne
