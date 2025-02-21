@@ -1,16 +1,18 @@
 package com.example.investiprojet.Services;
 
-import com.example.investiprojet.entities.User;
 import com.example.investiprojet.Repositories.UserRepository;
+import com.example.investiprojet.entities.User;
+import com.example.investiprojet.entities.UserStatus;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 
-    @Service
+@Service
     @AllArgsConstructor
     public class UserService implements IUserService {
 
@@ -28,10 +30,17 @@ import java.util.Optional;
                     .orElseThrow(() -> new RuntimeException("User not found"));
         }
 
-        @Override
-        public List<User> getAllUsers() {
-            return userRepository.findAll();
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll(); // Correction : ici on renvoie une liste complète
+    }
+
+    @Override
+        public Page<User> getAllUsers(Pageable pageable) {
+            return userRepository.findAll(pageable);
         }
+
+
 
         @Override
         public User updateUser(Long id, User userDetails) {
@@ -51,7 +60,26 @@ import java.util.Optional;
         public void deleteUser(Long id) {
             userRepository.deleteById(id);
         }
+
+
+
+    @Override
+    public Page<User> searchUsers(String firstName, String lastName, String email, String role, UserStatus statut, Pageable pageable) {
+        try {
+            return userRepository.searchUsers(firstName, lastName, email, role, statut, pageable);
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la recherche des utilisateurs : " + e.getMessage());
+        }
     }
+
+
+}
+
+
+
+
+
+
 
 
 

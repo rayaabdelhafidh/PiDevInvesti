@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import com.example.investiprojet.entities.UserStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED) // Bonne stratégie pour une table par entité enfant
@@ -29,4 +33,14 @@ public class User {
         private String adresse;
         @JsonProperty("phonenumber")
         private String phonenumber;
+        @Enumerated(EnumType.STRING)
+        private UserStatus statut; // Enumération pour éviter les erreurs de saisie
+        private String role;
+
+
+
+
+
+
+
 }
