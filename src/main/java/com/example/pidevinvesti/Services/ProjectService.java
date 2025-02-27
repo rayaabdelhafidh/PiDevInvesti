@@ -18,6 +18,8 @@ public class ProjectService implements IProjectService<Project, Integer> {
 
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private InvestmentRepository investmentRepository;
     @Override
     public Project save(Project project) {
         return projectRepository.save(project);
@@ -99,5 +101,14 @@ public class ProjectService implements IProjectService<Project, Integer> {
     @Override
     public void delete(Project project) {
         projectRepository.delete(project);
+    }
+
+
+    public Project affetcterInvestmentsToProject(List<Integer> idInvest, int idProject){
+        Project project=projectRepository.findById(idProject).orElse(null);
+        List<Investment> investments = investmentRepository.findAllById(idInvest);
+        project.setInvestments(investments);
+        projectRepository.save(project);
+        return project;
     }
 }

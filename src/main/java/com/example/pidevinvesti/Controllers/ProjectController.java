@@ -56,4 +56,10 @@ public class ProjectController {
         }
         return null;
     }
+    @PutMapping("/assignInvestToProject/{idProject}")
+    public void assignInvestmentToProject(@RequestBody List<Integer> idInvest
+            ,@PathVariable("idProject")  int idProject)
+    {
+        Project project=projectService.affetcterInvestmentsToProject(idInvest,idProject);
+    }
 }
