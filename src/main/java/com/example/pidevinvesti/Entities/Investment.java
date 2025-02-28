@@ -40,9 +40,16 @@ public class Investment {
     @JsonIgnore
     private Project project;
 
+    @ManyToOne
+    @JsonIgnore
+    private Investor investor;
+
     @OneToMany(mappedBy = "investment",fetch =FetchType.EAGER)
     private List<InvestmentReturn> investmentReturns;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "investment")
+    private List<Transaction> transactions;
 
     // Default constructor
     public Investment() {}
@@ -119,6 +126,14 @@ public class Investment {
         this.project = project;
     }
 
+    public Investor getInvestor() {
+        return investor;
+    }
+
+    public void setInvestor(Investor investor) {
+        this.investor = investor;
+    }
+
     public List<InvestmentReturn> getInvestmentReturns() {
         return investmentReturns;
     }
@@ -127,5 +142,12 @@ public class Investment {
         this.investmentReturns = investmentReturns;
     }
 
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
 
 }

@@ -1,21 +1,24 @@
 package com.example.pidevinvesti.Services;
 
+import com.example.pidevinvesti.Entities.Investment;
+import com.example.pidevinvesti.Entities.Transaction;
+import org.hibernate.MappingException;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public interface IInvestmentService <T,ID>{
-    T save(T entity);
-
-    T add (T entity);
-
-    Optional<T> findById(ID id);
-
-    T update (ID id, T entity);
-    List<T> findAll();
-
-
+public interface IInvestmentService <Investment,ID>{
+    Investment save(Investment entity);
+    Investment add (Investment entity);
+    Optional<Investment> findById(ID id);
+    Investment update (ID id, Investment entity);
+    List<Investment> findAll();
     void deleteById(ID id);
-
-
-    void delete(T entity);
+    void delete(Investment entity);
+    public Investment AcceptInvestment(ID id);
+    public Investment RefuseInvestment(ID id);
+    public void Checkinvest();
+    public void ReturnInvestment(Transaction transaction);
+    Investment Invest(int owner_id, BigDecimal amount_invested, Integer investment_id,Integer project_id);
 }
