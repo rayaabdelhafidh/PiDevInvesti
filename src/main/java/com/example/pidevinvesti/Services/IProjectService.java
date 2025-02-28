@@ -1,22 +1,28 @@
 package com.example.pidevinvesti.Services;
 
+import com.example.pidevinvesti.Entities.Project;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public interface IProjectService <T,ID>{
-    T save(T entity);
+public interface IProjectService <Project,ID>{
+    Project save(Project entity);
 
-    T add (T entity);
+    Project add (Project entity);
     public BigDecimal calculateTotalInvestment(int projectId) ;
 
-    Optional<T> findById(ID id);
+    public Project affetcterInvestmentsToProject(List<Integer> idInvest, int idProject);
 
-    T update (ID id, T entity);
-    List<T> findAll();
+    Optional<Project> findById(ID id);
+
+    Project update (ID id, Project entity);
+    List<Project> findAll();
+
+    public Project desaffetcterInvestmentsToProject(int idProject);
 
 
-    void deleteById(ID id);
+        void deleteById(ID id);
 
-    void delete(T entity);
+    void delete(Project entity);
 }

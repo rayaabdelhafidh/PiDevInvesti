@@ -131,4 +131,8 @@ public class Transaction {
     public void setStatus(TransactionStatus status) {
         this.status = status;
     }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
 }

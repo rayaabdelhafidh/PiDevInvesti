@@ -1,13 +1,12 @@
 package com.example.pidevinvesti.Entities;
 import com.example.pidevinvesti.Entities.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,4 +24,6 @@ public class Investor extends User {
     private InvestorStatus investorStatus;
     @JsonProperty("investmentdate")
     private LocalDateTime investmentdate;
+    @OneToMany(mappedBy = "investor",fetch = FetchType.EAGER)
+    private List<Investment> investments;
 }

@@ -3,12 +3,15 @@ import com.example.pidevinvesti.Entities.Investment;
 import com.example.pidevinvesti.Entities.InvestmentReturn;
 import com.example.pidevinvesti.Entities.Project;
 import com.example.pidevinvesti.Repositories.InvestmentRepository;
+import com.example.pidevinvesti.Repositories.InvestmentReturnRepository;
 import com.example.pidevinvesti.Repositories.ProjectRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +23,8 @@ public class ProjectService implements IProjectService<Project, Integer> {
     private ProjectRepository projectRepository;
     @Autowired
     private InvestmentRepository investmentRepository;
+    @Autowired
+    private InvestmentReturnRepository investmentReturnRepository;
     @Override
     public Project save(Project project) {
         return projectRepository.save(project);
@@ -66,7 +71,7 @@ public class ProjectService implements IProjectService<Project, Integer> {
     }
 
 
-    // Calculate total investment for a project
+    @Override
     public BigDecimal calculateTotalInvestment(int projectId) {
         Optional<Project> optionalProject = projectRepository.findById(projectId);
         if (optionalProject.isPresent()) {
@@ -103,7 +108,7 @@ public class ProjectService implements IProjectService<Project, Integer> {
         projectRepository.delete(project);
     }
 
-
+@Override
     public Project affetcterInvestmentsToProject(List<Integer> idInvest, int idProject){
         Project project=projectRepository.findById(idProject).orElse(null);
         List<Investment> investments = investmentRepository.findAllById(idInvest);
@@ -111,10 +116,47 @@ public class ProjectService implements IProjectService<Project, Integer> {
         projectRepository.save(project);
         return project;
     }
+    @Override
     public Project desaffetcterInvestmentsToProject(int idProject){
         Project project=projectRepository.findById(idProject).orElse(null);
         project.setInvestments(null);
         projectRepository.save(project);
         return project;
+    }
+
+    public void calculateAndDistributeROI(int projectId) {
+        // Get project
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        // Update project total revenue
+        project.updateTotalReturn();
+        projectRepository.save(project);
+
+        // Get total investments in the project
+        BigDecimal totalInvestmentAmount = project.getCumulInvest();
+        if (totalInvestmentAmount.compareTo(BigDecimal.ZERO) == 0) {
+            throw new IllegalStateException("No investments in this project");
+        }
+
+        // Calculate and distribute returns to investors
+        for (Investment investment : project.getInvestments()) {
+            BigDecimal investorShare = investment.getAmount()
+                    .divide(totalInvestmentAmount, RoundingMode.HALF_UP)
+                    .multiply(project.getTotalReturn());
+
+            BigDecimal roiPercentage = investorShare
+                    .subtract(investment.getAmount())
+                    .divide(investment.getAmount(), RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
+
+            InvestmentReturn investmentReturn = new InvestmentReturn();
+            investmentReturn.setInvestment(investment);
+            investmentReturn.setTotalReturn(investorShare);
+            investmentReturn.setRoiPercentage(roiPercentage);
+            investmentReturn.setPayoutDate(new Date());
+
+            investmentReturnRepository.save(investmentReturn);
+        }
     }
 }

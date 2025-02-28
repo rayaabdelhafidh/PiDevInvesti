@@ -42,6 +42,7 @@ public class Project {
 
     private BigDecimal totalReturn; // The total revenue generated from this project
 
+
     @OneToMany(mappedBy = "project",fetch =FetchType.EAGER)
     private List<Investment> investments;
 
@@ -126,6 +127,7 @@ public class Project {
         this.totalReturn = totalReturn;
     }
 
+
     public List<Investment> getInvestments() {
         return investments;
     }
@@ -133,6 +135,22 @@ public class Project {
     public void setInvestments(List<Investment> investments) {
         this.investments = investments;
     }
+
+    public BigDecimal calculateTotalRevenue() {
+        if (investments == null || investments.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        return investments.stream()
+                .flatMap(investment -> investment.getTransactions().stream()) // Get all transactions
+                .filter(transaction -> transaction.getTransactionType() == TransactionType.TRANSFERT) // Consider only income transactions
+                .map(Transaction::getAmount) // Get the amounts
+                .reduce(BigDecimal.ZERO, BigDecimal::add); // Sum all amounts
+    }
+    public void updateTotalReturn() {
+        this.totalReturn = calculateTotalRevenue();
+    }
+
 
 
 }
