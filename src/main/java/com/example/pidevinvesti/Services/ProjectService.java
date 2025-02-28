@@ -111,4 +111,10 @@ public class ProjectService implements IProjectService<Project, Integer> {
         projectRepository.save(project);
         return project;
     }
+    public Project desaffetcterInvestmentsToProject(int idProject){
+        Project project=projectRepository.findById(idProject).orElse(null);
+        project.setInvestments(null);
+        projectRepository.save(project);
+        return project;
+    }
 }

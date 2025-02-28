@@ -62,5 +62,10 @@ public class ProjectController {
     {
         Project project=projectService.affetcterInvestmentsToProject(idInvest,idProject);
     }
+    @PutMapping("/dessignInvestToProject/{idProject}")
+    public void dessignInvestmentToProject(@PathVariable("idProject")  int idProject)
+    {
+        Project project=projectService.desaffetcterInvestmentsToProject(idProject);
+    }
 
 }

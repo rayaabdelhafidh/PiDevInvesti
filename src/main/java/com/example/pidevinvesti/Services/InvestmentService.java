@@ -126,20 +126,27 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
             throw new IllegalStateException("Le projet ou l'investissement est invalide");
         }
 
-        // Calculer le retour en fonction du totalReturn du projet
+        // Calcul du retour sur investissement
         BigDecimal totalReturn = project.getTotalReturn(); // Revenus générés par le projet
         BigDecimal share = investment.getAmount().divide(project.getCumulInvest(), RoundingMode.HALF_UP);
         BigDecimal investmentReturnAmount = totalReturn.multiply(share);
 
+        // Calcul du ROI en pourcentage
+        BigDecimal roi = investmentReturnAmount.subtract(investment.getAmount())
+                .divide(investment.getAmount(), RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100)); // ROI en %
+
         // Enregistrer le retour
         InvestmentReturn investmentReturn = new InvestmentReturn();
         investmentReturn.setInvestment(investment);
-        investmentReturn.setRoiPercentage(investmentReturnAmount.divide(investment.getAmount(), RoundingMode.HALF_UP));
+        investmentReturn.setRoiPercentage(roi); // ROI en %
         investmentReturn.setTotalReturn(investmentReturnAmount);
         investmentReturn.setPayoutDate(Date.from(LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
+        // Sauvegarde
         investmentReturnRepository.save(investmentReturn);
     }
+
 
     @Override
     public Investment Invest(int owner_id, BigDecimal amount_invested, Integer investment_id,Integer project_id) {

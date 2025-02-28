@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 import java.util.Optional;
 
 
@@ -55,5 +57,23 @@ public class InvestmentController {
             return ResponseEntity.ok(investment);
         }
         return null;
+    }
+    @PutMapping("/invest/{id_user}/{amount}/{id_invest}")
+    Investment invest(@PathVariable("id_user") int account_id, @PathVariable("amount") BigDecimal amount, @PathVariable("id_invest")Integer id_invest,@PathVariable("project_id")Integer project_id) {
+        return investmentService.Invest(account_id,amount,id_invest,project_id);
+    }
+
+    @PutMapping("/accept/{id}")
+    Investment AcceptInvestment(@PathVariable("id") Integer id){
+        return investmentService.AcceptInvestment(id);
+    }
+    @PutMapping("/refuse/{id}")
+    Investment RefuseInvestment(@PathVariable("id") Integer id){
+        return investmentService.RefuseInvestment(id);
+    }
+
+    @PutMapping("/check")
+    void CheckInvestment() {
+        investmentService.Checkinvest();
     }
 }
