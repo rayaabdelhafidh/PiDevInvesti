@@ -49,10 +49,11 @@ public class Investment {
     @JsonIgnore
     private List<InvestmentReturn> investmentReturns;
 
-    @OneToMany(mappedBy = "investment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
-    @JsonIgnore
-    private List<Transaction> transactions;
+    // New field for Project accounts
+    @OneToOne(cascade = CascadeType.ALL) // Cascade save operations to the Project entity
+    @JoinColumn(name = "transaction_id", nullable = true) // Nullable because not all accounts have a project
+    @JsonBackReference
+    private Transaction transaction;
 
     // Default constructor
     public Investment() {}
@@ -145,12 +146,11 @@ public class Investment {
         this.investmentReturns = investmentReturns;
     }
 
-    public List<Transaction> getTransactions() {
-        return transactions;
+    public Transaction getTransaction() {
+        return transaction;
     }
 
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
     }
-
 }

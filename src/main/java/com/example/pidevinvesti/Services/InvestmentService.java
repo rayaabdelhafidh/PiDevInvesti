@@ -216,8 +216,11 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
         Transaction investmentTransaction = transactionService.createTransaction(investorAccount.getId(), projectAccount.getId(), investmentAmount);
 
         // Link transactions to investment
-        investment.getTransactions().add(feeTransaction);
-        investment.getTransactions().add(investmentTransaction);
+        investment.setTransaction(feeTransaction);
+        investment.setTransaction(investmentTransaction);
+
+        transactionService.addTransaction(investmentTransaction);
+        transactionService.addTransaction(feeTransaction);
         // Send confirmation email
         /*Mail mail = new Mail();
         mail.setTo(account_sender.getUser().getEmail());
@@ -235,29 +238,26 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
 
 
     @Override
-    public Investment affetcterTransactionToInvestment(List<Long> idTransaction, Integer idInvestment) {
+    public Investment affetcterTransactionToInvestment(Long idTransaction, Integer idInvestment) {
         Investment investment = investmentRepository.findById(idInvestment)
                     .orElseThrow(() -> new RuntimeException("Investment not found"));
 
-            List<Transaction> transactions = transactionRepository.findAllById(idTransaction);
+            Transaction transaction = transactionRepository.findById(idTransaction).orElse(null);
 
             // Ensure each transaction is linked to the investment
-            for (Transaction transaction : transactions) {
                 transaction.setInvestment(investment);
-            }
-
             // Save updated transactions
-            transactionRepository.saveAll(transactions);
+            transactionRepository.save(transaction);
 
             // Update investment with new transactions
-            investment.setTransactions(transactions);
+            investment.setTransaction(transaction);
             return investmentRepository.save(investment);
         }
 
     @Override
     public Investment desaffetcterTransactionFromInvestment(Integer idInvestment) {
         Investment investment=investmentRepository.findById(idInvestment).orElse(null);
-        investment.setTransactions(null);
+        investment.setTransaction(null);
         investmentRepository.save(investment);
         return investment;
     }

@@ -149,12 +149,12 @@ public class Project {
         }
 
         return investments.stream()
-                .flatMap(investment -> investment.getTransactions().stream()) // Get all transactions
-                .filter(transaction -> transaction.getTransactionType() == TransactionType.TRANSFERT) // Consider only income transactions
+                .map(Investment::getTransaction) // Get the transaction directly
+                .filter(transaction -> transaction != null && transaction.getTransactionType() == TransactionType.TRANSFERT) // Check for null and filter type
                 .map(Transaction::getAmount) // Get the amounts
                 .reduce(BigDecimal.ZERO, BigDecimal::add); // Sum all amounts
     }
-    public void updateTotalReturn() {
+        public void updateTotalReturn() {
         this.totalReturn = calculateTotalRevenue();
     }
 

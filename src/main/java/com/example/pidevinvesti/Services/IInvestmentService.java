@@ -23,7 +23,7 @@ public interface IInvestmentService <Investment,ID>{
     public void ReturnInvestment(Transaction transaction);
     Investment Invest(long owner_id, BigDecimal amount_invested,Integer project_id);
 
-    Investment affetcterTransactionToInvestment(List<Long> idTransaction, Integer idInvestment);
+    Investment affetcterTransactionToInvestment(Long idTransaction, Integer idInvestment);
 
     Investment desaffetcterTransactionFromInvestment(Integer idInvestment);
 

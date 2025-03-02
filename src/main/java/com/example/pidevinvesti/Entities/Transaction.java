@@ -1,5 +1,6 @@
 package com.example.pidevinvesti.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,8 +12,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -35,8 +34,9 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @ManyToOne
-    @JsonIgnore
+    @OneToOne(cascade = CascadeType.ALL) // Cascade save operations to the Project entity
+    @JoinColumn(name = "investment_id", nullable = true) // Nullable because not all accounts have a project
+    @JsonBackReference
     private Investment investment;
 
     @ManyToOne
@@ -63,6 +63,26 @@ public class Transaction {
     protected void onCreate() {
         this.createdAt = new Date();
         this.transactionDate = new Date();
+    }
+
+    public Transaction(Long transactionId, BigDecimal amount, TransactionType type, Date transactionDate, String description, TransactionStatus status, Investment investment, Account account, Account targetAccount, String reference, BigDecimal fee, BigDecimal balanceAfterTransaction, Date createdAt, Date updatedAt) {
+        this.transactionId = transactionId;
+        this.amount = amount;
+        this.type = type;
+        this.transactionDate = transactionDate;
+        this.description = description;
+        this.status = status;
+        this.investment = investment;
+        this.account = account;
+        this.targetAccount = targetAccount;
+        this.reference = reference;
+        this.fee = fee;
+        this.balanceAfterTransaction = balanceAfterTransaction;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public Transaction() {
     }
 
     @PreUpdate
@@ -96,9 +116,6 @@ public class Transaction {
         return transactionDate;
     }
 
-    public Investment getInvestment() {
-        return investment;
-    }
     public void setType(TransactionType type) {
         this.type = type;
     }
@@ -107,9 +124,6 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public void setInvestment(Investment investment) {
-        this.investment = investment;
-    }
 
     public void setSender(Account sender) {
         this.account = sender;
@@ -137,5 +151,13 @@ public class Transaction {
 
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    public Investment getInvestment() {
+        return investment;
+    }
+
+    public void setInvestment(Investment investment) {
+        this.investment = investment;
     }
 }

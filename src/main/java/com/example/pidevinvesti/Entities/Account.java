@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -59,6 +57,24 @@ public class Account {
     @JoinColumn(name = "investor_id", unique = true) // Ensures an investor has only one account
     @JsonBackReference
     private Investor investor; // This links the account to an investor
+
+    public Account(Long id, Client client, AccountType accountType, String accountNumber, double balance, double decouvertAutorise, double fraisMensuels, double tauxInteret, double plafondRetrait, AccountStatus status, Project project, Investor investor) {
+        this.id = id;
+        this.client = client;
+        this.accountType = accountType;
+        this.accountNumber = accountNumber;
+        this.balance = balance;
+        this.decouvertAutorise = decouvertAutorise;
+        this.fraisMensuels = fraisMensuels;
+        this.tauxInteret = tauxInteret;
+        this.plafondRetrait = plafondRetrait;
+        this.status = status;
+        this.project = project;
+        this.investor = investor;
+    }
+
+    public Account() {
+    }
 
     // Constructor with Client
     public Account(Client client) {
