@@ -3,10 +3,9 @@ package com.example.pidevinvesti.Services;
 import com.example.pidevinvesti.Entities.*;
 import com.example.pidevinvesti.Repositories.*;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.MappingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import jakarta.mail.MessagingException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -28,6 +27,9 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
     private AccountRepository accountRepository;
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private InvestorRepository investorRepository;
+    @Autowired
     private TransactionService transactionService;
 
     @Override
@@ -76,7 +78,7 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
     public Investment AcceptInvestment(Integer invest_id){
         Investment investment=investmentRepository.findById(invest_id).orElse(null);
         investment.setStatusInvest(StatusInvest.ACCEPTED);
-        investment.setStatusInvest(StatusInvest.UNDER_REVIEW);
+        //investment.setStatusInvest(StatusInvest.UNDER_REVIEW);
         return investmentRepository.save(investment);
     }
     @Override
@@ -85,38 +87,35 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
         investment.setStatusInvest(StatusInvest.REFUSED);
         return investmentRepository.save(investment);
     }
-
     @Override
-    public void Checkinvest() throws MappingException {
+    public void Checkinvest() {
         List<Investment> investments = investmentRepository.findByStatusInvest(StatusInvest.ACCEPTED);
 
         for (Investment investment : investments) {
-            List<Transaction> transactions = investment.getTransactions();
+            // Fetch only transactions of type INVESTMENT
+            List<Transaction> transactions = transactionRepository.findByInvestmentAndType(investment, TransactionType.INVESTMENT);
 
             for (Transaction transaction : transactions) {
-                if (transaction.getTransactionType() == TransactionType.INVESTMENT) {
-                    // Convertir Date en LocalDate
-                    LocalDate transactionDate = transaction.getDate().toInstant()
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate();
+                LocalDate transactionDate = transaction.getDate().toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
 
-                    // Ajouter un mois
-                    LocalDate nextDueDate = transactionDate.plusMonths(1);
+                LocalDate nextDueDate = transactionDate.plusMonths(1);
 
-                    // Vérifier si la date actuelle est après la date due
-                    if (LocalDate.now().isAfter(nextDueDate)) {
-                        // Mettre à jour la date de la transaction (reconvertir en Date)
-                        Date updatedDate = Date.from(nextDueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                        transaction.setDate(updatedDate);
+                if (LocalDate.now().isAfter(nextDueDate) && transaction.getStatus() == TransactionStatus.EN_ATTENTE) {
+                    // Update date
+                    Date updatedDate = Date.from(nextDueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    transaction.setDate(updatedDate);
+                    transaction.setStatus(TransactionStatus.VALIDEE); // Avoid reprocessing
 
-                        // Sauvegarde et appel de ReturnInvestment
-                        transactionRepository.save(transaction);
-                        ReturnInvestment(transaction);
-                    }
+                    // Save and process return
+                    transactionRepository.save(transaction);
+                    ReturnInvestment(transaction);
                 }
             }
         }
     }
+
     @Override
     public void ReturnInvestment(Transaction transaction) {
         Investment investment = transaction.getInvestment();
@@ -126,85 +125,99 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
             throw new IllegalStateException("Le projet ou l'investissement est invalide");
         }
 
-        // Calcul du retour sur investissement
-        BigDecimal totalReturn = project.getTotalReturn(); // Revenus générés par le projet
+        // Retrieve investor's account
+        Investor investor = investment.getInvestor();
+        Account investorAccount = accountRepository.findByInvestor(investor);
+        Account projectAccount = accountRepository.findByProject(project);
+
+        if (investorAccount == null || projectAccount == null) {
+            throw new IllegalStateException("Investor or project account is missing.");
+        }
+
+        // Calculate return on investment
+        BigDecimal totalReturn = project.getTotalReturn();
         BigDecimal share = investment.getAmount().divide(project.getCumulInvest(), RoundingMode.HALF_UP);
         BigDecimal investmentReturnAmount = totalReturn.multiply(share);
 
-        // Calcul du ROI en pourcentage
+        // Calculate ROI percentage
         BigDecimal roi = investmentReturnAmount.subtract(investment.getAmount())
                 .divide(investment.getAmount(), RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100)); // ROI en %
+                .multiply(BigDecimal.valueOf(100));
 
-        // Enregistrer le retour
+        // Register the investment return
         InvestmentReturn investmentReturn = new InvestmentReturn();
         investmentReturn.setInvestment(investment);
-        investmentReturn.setRoiPercentage(roi); // ROI en %
+        investmentReturn.setRoiPercentage(roi);
         investmentReturn.setTotalReturn(investmentReturnAmount);
-        investmentReturn.setPayoutDate(Date.from(LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        investmentReturn.setPayoutDate(new Date());
 
-        // Sauvegarde
+        // Save the investment return
         investmentReturnRepository.save(investmentReturn);
+
+        // Process the transaction (credit investor)
+        Transaction returnTransaction = new Transaction();
+        returnTransaction.setAmount(investmentReturnAmount);
+        returnTransaction.setSenderAccount(projectAccount);  // Project paying back
+        returnTransaction.setReceiverAccount(investorAccount);  // Investor receiving
+        returnTransaction.setTransactionType(TransactionType.RETURN_ON_INVESTMENT);
+        returnTransaction.setInvestment(investment);
+        returnTransaction.setDate(new Date());
+
+        transactionRepository.save(returnTransaction);
     }
 
-
     @Override
-    public Investment Invest(int owner_id, BigDecimal amount_invested, Integer investment_id,Integer project_id) {
-        Investment investment = investmentRepository.findById(investment_id).orElse(null);
-        Project project=projectRepository.findById(project_id).orElse(null);
-        if (investment == null ) {
-            throw new IllegalArgumentException("Investment not found.");
-        }
-        if (project == null ) {
-            throw new IllegalArgumentException("Project not found.");
-        }
+    public Investment Invest(long owner_id, BigDecimal amount_invested, Integer project_id) {
+// Find the investor and project
+        Investor investor = investorRepository.findById(owner_id)
+                .orElseThrow(() -> new RuntimeException("Investor not found"));
 
-        long account_id = accountRepository.findByClientId(owner_id);
-        Account account_sender = accountRepository.findById(account_id).orElse(null);
-        Account account_receiver = accountRepository.findByProject(project);
-        Account account_admin = accountRepository.findById(1L).orElse(null); // Admin account for fees
+        Project project = projectRepository.findById(project_id)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
 
-        if (account_sender == null || account_receiver == null || account_admin == null) {
-            throw new IllegalArgumentException("One or more accounts involved in the transaction are missing.");
+        // Check if the investor has an account
+        Account investorAccount = accountRepository.findByInvestor(investor);
+        Account projectAccount = accountRepository.findByProject(project);
+
+        if (investorAccount == null || projectAccount == null ) {
+            throw new RuntimeException("Missing investor or project account.");
         }
 
-        // Validate investment amount
-        BigDecimal newTotalInvestment = investment.getAmount().add(amount_invested);
+        // Check if the investor has enough balance
+        if (investorAccount.getBalance() < 0) {
+            throw new RuntimeException("Insufficient funds.");
+        }
+
+        // Check if the investment doesn't exceed project needs
+        BigDecimal newTotalInvestment = project.getCumulInvest().add(amount_invested);
         if (newTotalInvestment.compareTo(project.getAmountNeeded()) > 0) {
-            throw new IllegalArgumentException("The amount exceeds the required investment. Please try a smaller amount.");
+            throw new RuntimeException("Investment exceeds project funding needs.");
         }
 
-        if (newTotalInvestment.compareTo(project.getAmountNeeded()) == 0) {
-            investment.setInvestmentProgress(ProgressInvestment.COMPLETED);
-        }
+        // Deduct a 5% fee for the platform
+        BigDecimal adminFee = amount_invested.multiply(new BigDecimal("0.05"));
+        BigDecimal investmentAmount = amount_invested.subtract(adminFee);
 
-        // Calculate amounts
-        BigDecimal income = amount_invested.multiply(new BigDecimal("0.05")); // 5% commission
-        BigDecimal inv_amount = amount_invested.multiply(new BigDecimal("0.95")); // 95% investment
+        // Create Investment and link it to the investor & project
+        Investment investment = new Investment();
+        investment.setInvestor(investor);
+        investment.setProject(project);
+        investment.setAmount(investmentAmount);
 
-        // Update investment amount
-        investment.setAmount(newTotalInvestment);
+        // Add investment to project list and update cumulative investment
+        project.getInvestments().add(investment); // Ensures consistency
+        project.setCumulInvest(newTotalInvestment);
+        projectRepository.save(project);
+        // Save the investment
+        investment = investmentRepository.save(investment);
 
-        // Create & save transaction for admin fee (income)
-        Transaction transaction1 = new Transaction();
-        transaction1.setAmount(income);
-        transaction1.setSenderAccount(account_sender);
-        transaction1.setReceiverAccount(account_admin);
-        transaction1.setInvestment(investment);
-        transaction1.setTransactionType(TransactionType.INVESTMENT);
-        transaction1.setDate(new Date()); // Use `Date` instead of `LocalDate`
-        transaction1 = transactionService.addTransaction(transaction1);
+        // Create Transactions
+        Transaction feeTransaction = transactionService.createTransaction(investorAccount.getId(), projectAccount.getId(), adminFee);
+        Transaction investmentTransaction = transactionService.createTransaction(investorAccount.getId(), projectAccount.getId(), investmentAmount);
 
-        // Create & save transaction for investment
-        Transaction transaction2 = new Transaction();
-        transaction2.setAmount(inv_amount);
-        transaction2.setSenderAccount(account_sender);
-        transaction2.setReceiverAccount(account_receiver);
-        transaction2.setTransactionType(TransactionType.INVESTMENT);
-        transaction2.setInvestment(investment);
-        transaction2.setDate(new Date()); // Use `Date` instead of `LocalDate`
-        transaction2 = transactionService.addTransaction(transaction2);
-
+        // Link transactions to investment
+        investment.getTransactions().add(feeTransaction);
+        investment.getTransactions().add(investmentTransaction);
         // Send confirmation email
         /*Mail mail = new Mail();
         mail.setTo(account_sender.getUser().getEmail());
@@ -219,5 +232,34 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
         return investmentRepository.save(investment);
     }
 
+
+
+    @Override
+    public Investment affetcterTransactionToInvestment(List<Long> idTransaction, Integer idInvestment) {
+        Investment investment = investmentRepository.findById(idInvestment)
+                    .orElseThrow(() -> new RuntimeException("Investment not found"));
+
+            List<Transaction> transactions = transactionRepository.findAllById(idTransaction);
+
+            // Ensure each transaction is linked to the investment
+            for (Transaction transaction : transactions) {
+                transaction.setInvestment(investment);
+            }
+
+            // Save updated transactions
+            transactionRepository.saveAll(transactions);
+
+            // Update investment with new transactions
+            investment.setTransactions(transactions);
+            return investmentRepository.save(investment);
+        }
+
+    @Override
+    public Investment desaffetcterTransactionFromInvestment(Integer idInvestment) {
+        Investment investment=investmentRepository.findById(idInvestment).orElse(null);
+        investment.setTransactions(null);
+        investmentRepository.save(investment);
+        return investment;
+    }
 
 }

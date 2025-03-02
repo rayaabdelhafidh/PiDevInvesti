@@ -1,6 +1,8 @@
 package com.example.pidevinvesti.Entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,8 +44,13 @@ public class Project {
 
     private BigDecimal totalReturn; // The total revenue generated from this project
 
-
-    @OneToMany(mappedBy = "project",fetch =FetchType.EAGER)
+    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonManagedReference
+    private Account account; // Each Project has one Account
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    @JsonManagedReference
     private List<Investment> investments;
 
     // Default constructor

@@ -72,29 +72,6 @@ public class ProjectService implements IProjectService<Project, Integer> {
 
 
     @Override
-    public BigDecimal calculateTotalInvestment(int projectId) {
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
-        if (optionalProject.isPresent()) {
-            Project project = optionalProject.get();
-            return project.getInvestments()
-                    .stream()
-                    .map(Investment::getAmount) // Directly get BigDecimal amount
-                    .reduce(BigDecimal.ZERO, BigDecimal::add); // Sum all amounts
-        }
-        return BigDecimal.ZERO;
-    }
-
-    // Update project investment total
-    public void updateProjectInvestmentTotal(int projectId) {
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
-        if (optionalProject.isPresent()) {
-            Project project = optionalProject.get();
-            BigDecimal totalInvestment = calculateTotalInvestment(projectId);
-            project.setCumulInvest(totalInvestment);
-            projectRepository.save(project);
-        }
-    }
-    @Override
     public List<Project> findAll() {
         return projectRepository.findAll();    }
 
@@ -108,23 +85,36 @@ public class ProjectService implements IProjectService<Project, Integer> {
         projectRepository.delete(project);
     }
 
-@Override
-    public Project affetcterInvestmentsToProject(List<Integer> idInvest, int idProject){
-        Project project=projectRepository.findById(idProject).orElse(null);
-        List<Investment> investments = investmentRepository.findAllById(idInvest);
-        project.setInvestments(investments);
-        projectRepository.save(project);
-        return project;
-    }
     @Override
-    public Project desaffetcterInvestmentsToProject(int idProject){
-        Project project=projectRepository.findById(idProject).orElse(null);
-        project.setInvestments(null);
-        projectRepository.save(project);
-        return project;
+    public void updateProjectInvestmentTotal(Integer projectId) {
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            BigDecimal totalInvestment = calculateTotalInvestment(projectId);
+            project.setCumulInvest(totalInvestment);
+            projectRepository.save(project);
+        }
     }
 
-    public void calculateAndDistributeROI(int projectId) {
+    @Override
+    public Project desaffetcterInvestmentsToProject(Integer idProject){
+        Project project = projectRepository.findById(idProject)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        // Set each investment's project to null
+        for (Investment investment : project.getInvestments()) {
+            investment.setProject(null);
+            investmentRepository.save(investment); //  Update investment in DB
+        }
+
+        // Clear the list in the project
+        project.getInvestments().clear();
+        project.setCumulInvest(BigDecimal.ZERO); // Reset total investment
+
+        return projectRepository.save(project);
+    }
+
+    public void calculateAndDistributeROI(Integer projectId) {
         // Get project
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
@@ -159,4 +149,16 @@ public class ProjectService implements IProjectService<Project, Integer> {
             investmentReturnRepository.save(investmentReturn);
         }
     }
+
+    @Override
+    public BigDecimal calculateTotalInvestment(Integer projectId) {
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            return project.getInvestments()
+                    .stream()
+                    .map(Investment::getAmount) // Directly get BigDecimal amount
+                    .reduce(BigDecimal.ZERO, BigDecimal::add); // Sum all amounts
+        }
+        return BigDecimal.ZERO;    }
 }

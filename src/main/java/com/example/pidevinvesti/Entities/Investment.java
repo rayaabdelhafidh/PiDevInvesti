@@ -1,8 +1,6 @@
 package com.example.pidevinvesti.Entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,17 +36,22 @@ public class Investment {
 
     @ManyToOne
     @JsonIgnore
+    @JsonBackReference
     private Project project;
 
     @ManyToOne
     @JsonIgnore
+    @JsonBackReference
     private Investor investor;
 
-    @OneToMany(mappedBy = "investment",fetch =FetchType.EAGER)
+    @OneToMany(mappedBy = "investment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @JsonIgnore
     private List<InvestmentReturn> investmentReturns;
 
+    @OneToMany(mappedBy = "investment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     @JsonIgnore
-    @OneToMany(mappedBy = "investment")
     private List<Transaction> transactions;
 
     // Default constructor

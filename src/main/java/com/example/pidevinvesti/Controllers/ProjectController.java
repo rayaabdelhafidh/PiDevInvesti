@@ -16,6 +16,7 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/project")
 public class ProjectController {
+
     @Autowired
     private ProjectService projectService;
 
@@ -55,12 +56,6 @@ public class ProjectController {
             return ResponseEntity.ok(project);
         }
         return null;
-    }
-    @PutMapping("/assignInvestToProject/{idProject}")
-    public void assignInvestmentToProject(@RequestBody List<Integer> idInvest
-            ,@PathVariable("idProject")  int idProject)
-    {
-        Project project=projectService.affetcterInvestmentsToProject(idInvest,idProject);
     }
     @PutMapping("/dessignInvestToProject/{idProject}")
     public void dessignInvestmentToProject(@PathVariable("idProject")  int idProject)

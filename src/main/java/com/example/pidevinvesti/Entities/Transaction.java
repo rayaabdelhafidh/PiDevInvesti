@@ -1,5 +1,6 @@
 package com.example.pidevinvesti.Entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,7 +34,9 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
+
     @ManyToOne
+    @JsonIgnore
     private Investment investment;
 
     @ManyToOne

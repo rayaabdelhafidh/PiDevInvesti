@@ -2,6 +2,7 @@ package com.example.pidevinvesti.Repositories;
 
 import com.example.pidevinvesti.Entities.Account;
 import com.example.pidevinvesti.Entities.AccountType;
+import com.example.pidevinvesti.Entities.Investor;
 import com.example.pidevinvesti.Entities.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,5 @@ public interface AccountRepository extends JpaRepository<Account,Long> {
     List<Account> findByClientId(Long clientId);
     Long findByClientId(int id);
     Account findByProject(Project project);
+    Account findByInvestor(Investor investor);
 }

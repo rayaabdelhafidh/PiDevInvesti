@@ -1,5 +1,6 @@
 package com.example.pidevinvesti.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -17,16 +18,22 @@ public class InvestmentReturn {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private int returnId;
 
-    @ManyToOne
-    @JsonIgnore
-    private Investment investment; // ROI is calculated per investment
-
-    private BigDecimal roiPercentage; // e.g., 20% means 0.20
-    private BigDecimal totalReturn; // Amount this investor gets
+    private BigDecimal roiPercentage;
+    private BigDecimal totalReturn;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     @Temporal(TemporalType.DATE)
     private Date payoutDate; // When the ROI is paid
+
+    //Relations
+    @ManyToOne
+    @JsonIgnore
+    @JsonBackReference
+    private Investment investment;
+    @ManyToOne
+    @JsonIgnore
+    @JsonBackReference
+    private Investor investor;
 
     // Default constructor
     public InvestmentReturn() {}
@@ -76,8 +83,17 @@ public class InvestmentReturn {
         return payoutDate;
     }
 
+    public Investor getInvestor() {
+        return investor;
+    }
+
+    public void setInvestor(Investor investor) {
+        this.investor = investor;
+    }
+
     public void setPayoutDate(Date payoutDate) {
         this.payoutDate = payoutDate;
     }
 }
+
 

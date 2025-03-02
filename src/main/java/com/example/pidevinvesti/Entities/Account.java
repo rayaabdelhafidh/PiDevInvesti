@@ -1,5 +1,6 @@
 package com.example.pidevinvesti.Entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -51,7 +52,13 @@ public class Account {
     // New field for Project accounts
     @OneToOne(cascade = CascadeType.ALL) // Cascade save operations to the Project entity
     @JoinColumn(name = "project_id", nullable = true) // Nullable because not all accounts have a project
+    @JsonBackReference
     private Project project;
+
+    @OneToOne
+    @JoinColumn(name = "investor_id", unique = true) // Ensures an investor has only one account
+    @JsonBackReference
+    private Investor investor; // This links the account to an investor
 
     // Constructor with Client
     public Account(Client client) {
@@ -141,6 +148,14 @@ public class Account {
 
     public void setPlafondRetrait(double plafondRetrait) {
         this.plafondRetrait = plafondRetrait;
+    }
+
+    public Investor getInvestor() {
+        return investor;
+    }
+
+    public void setInvestor(Investor investor) {
+        this.investor = investor;
     }
 
     public void setStatus(AccountStatus status) {

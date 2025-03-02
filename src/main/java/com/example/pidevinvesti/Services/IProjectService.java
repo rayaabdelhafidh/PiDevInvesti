@@ -10,19 +10,19 @@ public interface IProjectService <Project,ID>{
     Project save(Project entity);
 
     Project add (Project entity);
-    public BigDecimal calculateTotalInvestment(int projectId) ;
+    BigDecimal calculateTotalInvestment(ID id) ;
 
-    public Project affetcterInvestmentsToProject(List<Integer> idInvest, int idProject);
 
     Optional<Project> findById(ID id);
 
     Project update (ID id, Project entity);
     List<Project> findAll();
 
-    public Project desaffetcterInvestmentsToProject(int idProject);
+    Project desaffetcterInvestmentsToProject(ID id);
 
-
-        void deleteById(ID id);
+    void deleteById(ID id);
 
     void delete(Project entity);
+    void updateProjectInvestmentTotal(ID id);
+    void calculateAndDistributeROI(ID id);
 }

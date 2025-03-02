@@ -1,6 +1,7 @@
 package com.example.pidevinvesti.Entities;
 import com.example.pidevinvesti.Entities.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,12 +19,19 @@ public class Investor extends User {
     private double investamount;
     @JsonProperty("description")
     private String description;
-
     @Enumerated(EnumType.STRING)
     @JsonProperty("investorStatus")
     private InvestorStatus investorStatus;
     @JsonProperty("investmentdate")
     private LocalDateTime investmentdate;
-    @OneToMany(mappedBy = "investor",fetch = FetchType.EAGER)
+
+    @OneToMany(mappedBy = "investor", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @JsonIgnore
     private List<Investment> investments;
+
+    @OneToOne(mappedBy = "investor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @JsonIgnore
+    private Account account; // Each Investor has only one Account
 }

@@ -1,6 +1,7 @@
 package com.example.pidevinvesti.Services;
 
 import com.example.pidevinvesti.Entities.Investment;
+import com.example.pidevinvesti.Entities.Project;
 import com.example.pidevinvesti.Entities.Transaction;
 import org.hibernate.MappingException;
 
@@ -20,5 +21,10 @@ public interface IInvestmentService <Investment,ID>{
     public Investment RefuseInvestment(ID id);
     public void Checkinvest();
     public void ReturnInvestment(Transaction transaction);
-    Investment Invest(int owner_id, BigDecimal amount_invested, Integer investment_id,Integer project_id);
-}
+    Investment Invest(long owner_id, BigDecimal amount_invested,Integer project_id);
+
+    Investment affetcterTransactionToInvestment(List<Long> idTransaction, Integer idInvestment);
+
+    Investment desaffetcterTransactionFromInvestment(Integer idInvestment);
+
+    }

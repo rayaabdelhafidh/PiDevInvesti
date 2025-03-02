@@ -58,9 +58,9 @@ public class InvestmentController {
         }
         return null;
     }
-    @PutMapping("/invest/{id_user}/{amount}/{id_invest}")
+    @PutMapping("/invest/{id_user}/{amount}/{id_invest}/{project_id}")
     Investment invest(@PathVariable("id_user") int account_id, @PathVariable("amount") BigDecimal amount, @PathVariable("id_invest")Integer id_invest,@PathVariable("project_id")Integer project_id) {
-        return investmentService.Invest(account_id,amount,id_invest,project_id);
+        return investmentService.Invest(account_id,amount,project_id);
     }
 
     @PutMapping("/accept/{id}")
