@@ -203,6 +203,9 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
         investment.setInvestor(investor);
         investment.setProject(project);
         investment.setAmount(investmentAmount);
+        investment.setStatusInvest(StatusInvest.ACCEPTED);
+        investment.setInvestmentProgress(ProgressInvestment.IN_PROGRESS);
+        investment.setInvestmentDate(new Date());
 
         // Add investment to project list and update cumulative investment
         project.getInvestments().add(investment); // Ensures consistency
