@@ -27,7 +27,7 @@ public class UserControllers {
     private IUserService UserService ;
 
     @PostMapping("/add")
-    public User addUser(@RequestBody User User){
+    public User createUser(@RequestBody User User){
         return UserService.createUser(User);
     }
     @GetMapping("/{id}")
