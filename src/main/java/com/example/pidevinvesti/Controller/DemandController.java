@@ -1,12 +1,17 @@
 package com.example.pidevinvesti.Controller;
 
 import com.example.pidevinvesti.Entity.Demand;
+import com.example.pidevinvesti.Entity.Loan;
+import com.example.pidevinvesti.Repository.IDemandRepo;
+import com.example.pidevinvesti.Repository.ILoanRepo;
 import com.example.pidevinvesti.Service.IDemandService;
+import jakarta.websocket.server.PathParam;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,10 +20,14 @@ import java.util.Optional;
 public class DemandController {
     @Autowired
     IDemandService DemandService;
+    @Autowired
+    IDemandRepo demandRepo;
 
+    @Autowired
+    ILoanRepo loanRepo;
     @PostMapping("add")
-    public Demand ajouterDemand(@RequestBody Demand demand) {
-        return DemandService.AddDemand(demand);
+    public Demand ajouterDemand(@RequestBody Demand demand, @RequestParam(required = true) Long packId) {
+        return DemandService.AddDemand(demand , packId);
     }
 
     @GetMapping("all")
@@ -45,5 +54,24 @@ public class DemandController {
 
         DemandService.DeleteDemand(id);
         return ResponseEntity.noContent().build(); //
+    }
+
+    @PutMapping("/{demandId}/traiter")
+    public ResponseEntity<String> traiterDemande(
+            @PathVariable Long demandId,
+            @RequestParam String status) {
+
+        try {
+
+            DemandService.TraiterDemande(demandId, status);
+
+            return ResponseEntity.ok("Demande traitée avec succès !");
+
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Erreur : " + e.getMessage());
+        }
+
+
     }
 }
