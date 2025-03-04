@@ -2,6 +2,7 @@ package com.example.pidevinvesti.Services;
 
 import com.example.pidevinvesti.Entities.Investment;
 import com.example.pidevinvesti.Entities.Project;
+import com.example.pidevinvesti.Entities.StatusInvest;
 import com.example.pidevinvesti.Entities.Transaction;
 import org.hibernate.MappingException;
 
@@ -22,6 +23,7 @@ public interface IInvestmentService <Investment,ID>{
     public void Checkinvest();
     public void ReturnInvestment(Transaction transaction);
     Investment Invest(long owner_id, BigDecimal amount_invested,Integer project_id);
+    List<Investment> findByStatus(StatusInvest status);
 
     Investment affetcterTransactionToInvestment(Long idTransaction, Integer idInvestment);
 

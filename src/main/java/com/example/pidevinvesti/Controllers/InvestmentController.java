@@ -1,6 +1,7 @@
 package com.example.pidevinvesti.Controllers;
 
 import com.example.pidevinvesti.Entities.Investment;
+import com.example.pidevinvesti.Entities.StatusInvest;
 import com.example.pidevinvesti.Services.InvestmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -37,6 +39,11 @@ public class InvestmentController {
     public ResponseEntity<Investment> updateInvestment(@PathVariable Integer id, @RequestBody Investment investment) {
         Investment updatedInvestment = investmentService.update(id, investment);
         return (updatedInvestment != null) ? ResponseEntity.ok(updatedInvestment) : ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/status/{status}")
+    public List<Investment> getInvestmentsByStatus(@PathVariable("status") StatusInvest status) {
+        return investmentService.findByStatus(status);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -75,5 +82,10 @@ public class InvestmentController {
     @PutMapping("/check")
     void CheckInvestment() {
         investmentService.Checkinvest();
+    }
+
+    @GetMapping("/data")
+    public ResponseEntity<List<Map<String, Object>>> getInvestmentData() {
+        return ResponseEntity.ok(investmentService.getInvestmentData());
     }
 }

@@ -10,9 +10,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 @Service
 @Slf4j
 public class InvestmentService implements IInvestmentService<Investment, Integer> {
@@ -263,6 +262,29 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
         investment.setTransaction(null);
         investmentRepository.save(investment);
         return investment;
+    }
+
+    @Override
+    public List<Investment> findByStatus(StatusInvest status) {
+        return investmentRepository.findByStatusInvest(status);
+    }
+
+    public List<Map<String, Object>> getInvestmentData() {
+        List<Investment> investments = investmentRepository.findAllInvestmentsWithProjects();
+        List<Map<String, Object>> data = new ArrayList<>();
+
+        for (Investment i : investments) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("amount", i.getAmount());
+            entry.put("investmentDate", i.getInvestmentDate());
+            entry.put("projectStatus", i.getProject().getProjectStatus());
+            entry.put("amountNeeded", i.getProject().getAmountNeeded());
+            entry.put("cumulInvest", i.getProject().getCumulInvest());
+            entry.put("totalReturn", i.getProject().getTotalReturn());
+            entry.put("investmentProgress", i.getInvestmentProgress()); // Cible
+            data.add(entry);
+        }
+        return data;
     }
 
 }
