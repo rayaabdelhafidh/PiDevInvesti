@@ -1,5 +1,6 @@
 package com.example.pidevinvesti.Services;
 
+import com.example.pidevinvesti.Entities.InvestmentReturn;
 import com.example.pidevinvesti.Entities.Project;
 
 import java.math.BigDecimal;
@@ -25,4 +26,5 @@ public interface IProjectService <Project,ID>{
     void delete(Project entity);
     void updateProjectInvestmentTotal(ID id);
     void calculateAndDistributeROI(ID id);
-}
+    List<InvestmentReturn> getRelatedInvestmentReturns(ID id);
+    }

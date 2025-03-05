@@ -6,6 +6,7 @@ import com.example.pidevinvesti.Entities.Transaction;
 import com.example.pidevinvesti.Entities.TransactionType;
 import com.example.pidevinvesti.Repositories.InvestmentRepository;
 import com.example.pidevinvesti.Services.InvestmentService;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -74,7 +75,7 @@ public class InvestmentController {
     }
 
     @PutMapping("/invest/{id_user}/{amount}/{project_id}")
-    Investment invest(@PathVariable("id_user") long id_user, @PathVariable("amount") BigDecimal amount, @PathVariable("project_id") Integer project_id) {
+    Investment invest(@PathVariable("id_user") long id_user, @PathVariable("amount") BigDecimal amount, @PathVariable("project_id") Integer project_id)throws MessagingException {
         return investmentService.Invest(id_user, amount, project_id);
     }
 
@@ -107,5 +108,11 @@ public class InvestmentController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+    @GetMapping("/trigger-scheduled-return-investment")
+    public ResponseEntity<String> triggerScheduledReturnInvestment() {
+        // Manually trigger the scheduled task
+        investmentService.triggerScheduledReturnInvestmentManually();
+        return ResponseEntity.ok("Scheduled Return Investment triggered manually.");
     }
 }

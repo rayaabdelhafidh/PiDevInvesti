@@ -14,7 +14,6 @@ import java.util.List;
 @Setter
 public class Investor extends User {
 
-
     @JsonProperty("investamount")
     private double investamount;
     @JsonProperty("description")

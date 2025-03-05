@@ -2,19 +2,30 @@ package com.example.pidevinvesti.Services;
 
 import com.example.pidevinvesti.Entities.*;
 import com.example.pidevinvesti.Repositories.*;
+import com.example.pidevinvesti.config.EmailService;
+import com.example.pidevinvesti.config.Mail;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Service
 @Slf4j
 public class InvestmentService implements IInvestmentService<Investment, Integer> {
+
+    private static final Logger logger = LoggerFactory.getLogger(InvestmentService.class);
 
     @Autowired
     private InvestmentRepository investmentRepository;
@@ -30,7 +41,8 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
     private InvestorRepository investorRepository;
     @Autowired
     private TransactionService transactionService;
-
+     @Autowired
+     private EmailService emailService;
     @Override
     public Investment save(Investment investment) {
         return investmentRepository.save(investment);
@@ -77,44 +89,103 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
     public Investment AcceptInvestment(Integer invest_id){
         Investment investment=investmentRepository.findById(invest_id).orElse(null);
         investment.setStatusInvest(StatusInvest.ACCEPTED);
-        //investment.setStatusInvest(StatusInvest.UNDER_REVIEW);
+        investment.setInvestmentProgress(ProgressInvestment.IN_PROGRESS);
         return investmentRepository.save(investment);
     }
     @Override
     public Investment RefuseInvestment(Integer invest_id){
         Investment investment=investmentRepository.findById(invest_id).orElse(null);
         investment.setStatusInvest(StatusInvest.REFUSED);
+        investment.setInvestmentProgress(ProgressInvestment.FAILED);
         return investmentRepository.save(investment);
     }
     @Override
     public void Checkinvest() {
         List<Investment> investments = investmentRepository.findByStatusInvest(StatusInvest.ACCEPTED);
 
+
         for (Investment investment : investments) {
-            // Fetch only transactions of type INVESTMENT
-            List<Transaction> transactions = transactionRepository.findByType(TransactionType.INVESTMENT);
+            Project project = investment.getProject();
+            if (project != null) {
+                // Calculate the next scheduled date for ROI calculation
+                Date nextScheduledDate = calculateNextScheduledDate(investment, project);
 
-            for (Transaction transaction : transactions) {
-                LocalDate transactionDate = transaction.getDate().toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate();
+                // If the next scheduled date is today, process the investment
+                if (nextScheduledDate != null && LocalDate.now().isEqual(nextScheduledDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())) {
+                    List<Transaction> transactions = transactionRepository.findByType(TransactionType.INVESTMENT);
 
-                LocalDate nextDueDate = transactionDate.plusMonths(1);
+                    for (Transaction transaction : transactions) {
+                        LocalDate transactionDate = transaction.getDate().toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate();
 
-                if (LocalDate.now().isAfter(nextDueDate) && transaction.getStatus() == TransactionStatus.EN_ATTENTE) {
-                    // Update date
-                    Date updatedDate = Date.from(nextDueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-                    transaction.setDate(updatedDate);
-                    transaction.setStatus(TransactionStatus.VALIDEE); // Avoid reprocessing
+                        LocalDate nextDueDate = transactionDate.plusMonths(1);
 
-                    // Save and process return
-                    transactionRepository.save(transaction);
-                    ReturnInvestment(investment.getInvestId());
+                        // Check if the transaction is due
+                        if (LocalDate.now().isAfter(nextDueDate) && transaction.getStatus() == TransactionStatus.EN_ATTENTE) {
+                            // Update the transaction date and status
+                            Date updatedDate = Date.from(nextDueDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                            transaction.setDate(updatedDate);
+                            transaction.setStatus(TransactionStatus.VALIDEE);
+
+                            // Save updated transaction and process return
+                            transactionRepository.save(transaction);
+                            ReturnInvestment(investment.getInvestId());
+                        }
+                    }
                 }
             }
         }
     }
 
+    public String getNextReturnMessage(Investment investment, Project project) {
+        Date nextReturnDate = calculateNextScheduledDate(investment, project);
+
+        if (nextReturnDate == null) {
+            return "Investment return will not be generated in the near future.";
+        }
+
+        // Format the next return date into a readable format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String formattedDate = dateFormat.format(nextReturnDate);
+
+        return "The next return for this investment will be generated on " + formattedDate + ".";
+    }
+    // Method to calculate next scheduled date for ROI calculation
+    public Date calculateNextScheduledDate(Investment investment, Project project) {
+        Calendar calendar = Calendar.getInstance();
+        Date baseDate = investment.getInvestmentDate() != null ? investment.getInvestmentDate() : project.getStartDate();
+
+        calendar.setTime(baseDate);
+
+        // For quarterly ROI calculation
+        int durationInMonths = project.getProjectDuration();
+        int monthsBetween = (int) ((System.currentTimeMillis() - baseDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+
+        if (monthsBetween % 3 == 0 && monthsBetween <= durationInMonths) {
+            calendar.add(Calendar.MONTH, 3);
+        } else {
+            return null; // Not time yet
+        }
+
+        return calendar.getTime();
+    }
+
+    @Scheduled(cron = "0 0 0 1 */3 ?") // Executes at midnight on the first day of every third month
+    public void scheduledReturnInvestment() {
+        // Fetch all investments
+        List<Investment> investments = investmentRepository.findAll();
+        for (Investment investment : investments) {
+            // Check if it's time for the return calculation
+            ReturnInvestment(investment.getInvestId());
+        }
+    }
+    public void triggerScheduledReturnInvestmentManually() {
+        List<Investment> investments = investmentRepository.findAll(); // Fetch all investments or a subset
+        for (Investment investment : investments) {
+            ReturnInvestment(investment.getInvestId());
+        }
+    }
     @Override
     public void ReturnInvestment(Integer investment_id) {
         Investment investment = investmentRepository.findById(investment_id)
@@ -126,6 +197,10 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
             throw new IllegalStateException("Le projet ou l'investissement est invalide");
         }
 
+        // Generate message for when the next return will occur
+        String returnMessage = getNextReturnMessage(investment, project);
+        logger.info(returnMessage);  // Log the message so it’s visible in the logs
+
         // Retrieve investor's account
         Investor investor = investment.getInvestor();
         Account investorAccount = accountRepository.findByInvestor(investor);
@@ -135,7 +210,7 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
             throw new IllegalStateException("Investor or project account is missing.");
         }
 
-        // ✅ Calculate return on investment
+        // Calculate return on investment
         BigDecimal totalReturn = project.getTotalReturn();
         BigDecimal investmentAmount = investment.getAmount();
 
@@ -177,8 +252,8 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
 
         // ✅ Process the transaction
         Transaction returnTransaction = transactionService.createTransaction(
-                investorAccount.getId(),
                 projectAccount.getId(),
+                investorAccount.getId(),
                 investmentReturnAmount
         );
 
@@ -194,7 +269,7 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
     }
 
     @Override
-    public Investment Invest(long owner_id, BigDecimal amount_invested, Integer project_id) {
+    public Investment Invest(long owner_id, BigDecimal amount_invested, Integer project_id)throws MessagingException {
 // Find the investor and project
         Investor investor = investorRepository.findById(owner_id)
                 .orElseThrow(() -> new RuntimeException("Investor not found"));
@@ -247,16 +322,16 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
         transactionService.addTransaction(investmentTransaction);
         transactionService.addTransaction(feeTransaction);
         // Send confirmation email
-        /*Mail mail = new Mail();
-        mail.setTo(account_sender.getUser().getEmail());
+        Mail mail = new Mail();
+        mail.setTo(investorAccount.getInvestor().getEmail());
         mail.setSubject("Investment Confirmation");
-        mail.setContent("Dear " + account_sender.getUser().getUsername() + ",\n\n"
+        mail.setContent("Dear " + investorAccount.getInvestor().getFirstName() + ",\n\n"
                 + "Your investment of " + amount_invested + " has been successfully processed.\n"
-                + "You will receive your ROI on a monthly basis.\n\n"
+                + "You will receive your ROI on a quarterly basis.\n\n"
                 + "Best regards,\nInvestment Team");
 
         emailService.sendHtmlEmail(mail);
-*/
+
         return investment;
     }
 

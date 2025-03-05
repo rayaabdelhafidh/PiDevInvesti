@@ -4,6 +4,7 @@ import com.example.pidevinvesti.Entities.Investment;
 import com.example.pidevinvesti.Entities.Project;
 import com.example.pidevinvesti.Entities.StatusInvest;
 import com.example.pidevinvesti.Entities.Transaction;
+import jakarta.mail.MessagingException;
 import org.hibernate.MappingException;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public interface IInvestmentService <Investment,ID>{
     public Investment RefuseInvestment(ID id);
     public void Checkinvest();
     public void ReturnInvestment(ID id);
-    Investment Invest(long owner_id, BigDecimal amount_invested,Integer project_id);
+    Investment Invest(long owner_id, BigDecimal amount_invested,Integer project_id)throws MessagingException;
     List<Investment> findByStatus(StatusInvest status);
 
 

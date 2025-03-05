@@ -23,6 +23,9 @@ public class Project {
 
     @JsonProperty("projectName")
     private String projectName;
+    @JsonProperty("projectDuration")
+
+    private int projectDuration;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     @Temporal(TemporalType.DATE)
@@ -159,6 +162,43 @@ public class Project {
         this.totalReturn = cumulInvest;
     }
 
+    public int getProjectDuration() {
+        return projectDuration;
+    }
 
+    public void setProjectDuration(int projectDuration) {
+        this.projectDuration = projectDuration;
+    }
 
+    public String getSector() {
+        return sector;
+    }
+
+    public void setSector(String sector) {
+        this.sector = sector;
+    }
+
+    public RiskProfile getRiskLevel() {
+        return riskLevel;
+    }
+
+    public void setRiskLevel(RiskProfile riskLevel) {
+        this.riskLevel = riskLevel;
+    }
+
+    public BigDecimal getHistoricalROI() {
+        return historicalROI;
+    }
+
+    public void setHistoricalROI(BigDecimal historicalROI) {
+        this.historicalROI = historicalROI;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 }

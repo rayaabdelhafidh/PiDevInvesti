@@ -14,6 +14,7 @@ import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,6 +26,7 @@ public class ProjectService implements IProjectService<Project, Integer> {
     private InvestmentRepository investmentRepository;
     @Autowired
     private InvestmentReturnRepository investmentReturnRepository;
+
     @Override
     public Project save(Project project) {
         return projectRepository.save(project);
@@ -37,7 +39,8 @@ public class ProjectService implements IProjectService<Project, Integer> {
 
     @Override
     public Optional<Project> findById(Integer id) {
-        return projectRepository.findById(id);    }
+        return projectRepository.findById(id);
+    }
 
     @Override
     public Project update(Integer id, Project newProject) {
@@ -73,7 +76,8 @@ public class ProjectService implements IProjectService<Project, Integer> {
 
     @Override
     public List<Project> findAll() {
-        return projectRepository.findAll();    }
+        return projectRepository.findAll();
+    }
 
     @Override
     public void deleteById(Integer id) {
@@ -97,7 +101,7 @@ public class ProjectService implements IProjectService<Project, Integer> {
     }
 
     @Override
-    public Project desaffetcterInvestmentsToProject(Integer idProject){
+    public Project desaffetcterInvestmentsToProject(Integer idProject) {
         Project project = projectRepository.findById(idProject)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
 
@@ -160,5 +164,19 @@ public class ProjectService implements IProjectService<Project, Integer> {
                     .map(Investment::getAmount) // Directly get BigDecimal amount
                     .reduce(BigDecimal.ZERO, BigDecimal::add); // Sum all amounts
         }
-        return BigDecimal.ZERO;    }
+        return BigDecimal.ZERO;
+    }
+
+    @Override
+    public List<InvestmentReturn> getRelatedInvestmentReturns(Integer projectId) {
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        if (optionalProject.isPresent()) {
+            Project project = optionalProject.get();
+            // Flatten the list of InvestmentReturns
+            return project.getInvestments().stream()
+                    .flatMap(investment -> investment.getInvestmentReturns().stream()) // Flatten the InvestmentReturns
+                    .collect(Collectors.toList()); // Collect the flattened results into a list
+        }
+        return null;
+    }
 }

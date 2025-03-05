@@ -1,6 +1,7 @@
 package com.example.pidevinvesti.Controllers;
 
 import com.example.pidevinvesti.Entities.Investment;
+import com.example.pidevinvesti.Entities.InvestmentReturn;
 import com.example.pidevinvesti.Entities.Project;
 import com.example.pidevinvesti.Services.InvestmentService;
 import com.example.pidevinvesti.Services.ProjectService;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,6 +63,18 @@ public class ProjectController {
     public void dessignInvestmentToProject(@PathVariable("idProject")  int idProject)
     {
         Project project=projectService.desaffetcterInvestmentsToProject(idProject);
+    }
+
+    @GetMapping("/CalculateTotalInvestments/{idProject}")
+    public BigDecimal calculateTotalInvestment(@PathVariable("idProject")  int idProject)
+    {
+        return projectService.calculateTotalInvestment(idProject);
+    }
+
+    @GetMapping("/getRelatedInvestmentReturns/{idProject}")
+    public List<InvestmentReturn> getRelatedInvestmentReturns(@PathVariable("idProject")  int idProject)
+    {
+        return projectService.getRelatedInvestmentReturns(idProject);
     }
 
 }
