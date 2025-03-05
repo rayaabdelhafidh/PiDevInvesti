@@ -34,11 +34,6 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
-    @OneToOne(cascade = CascadeType.ALL) // Cascade save operations to the Project entity
-    @JoinColumn(name = "investment_id", nullable = true) // Nullable because not all accounts have a project
-    @JsonBackReference
-    private Investment investment;
-
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
@@ -65,14 +60,13 @@ public class Transaction {
         this.transactionDate = new Date();
     }
 
-    public Transaction(Long transactionId, BigDecimal amount, TransactionType type, Date transactionDate, String description, TransactionStatus status, Investment investment, Account account, Account targetAccount, String reference, BigDecimal fee, BigDecimal balanceAfterTransaction, Date createdAt, Date updatedAt) {
+    public Transaction(Long transactionId, BigDecimal amount, TransactionType type, Date transactionDate, String description, TransactionStatus status,Account account, Account targetAccount, String reference, BigDecimal fee, BigDecimal balanceAfterTransaction, Date createdAt, Date updatedAt) {
         this.transactionId = transactionId;
         this.amount = amount;
         this.type = type;
         this.transactionDate = transactionDate;
         this.description = description;
         this.status = status;
-        this.investment = investment;
         this.account = account;
         this.targetAccount = targetAccount;
         this.reference = reference;
@@ -153,11 +147,4 @@ public class Transaction {
         return amount;
     }
 
-    public Investment getInvestment() {
-        return investment;
-    }
-
-    public void setInvestment(Investment investment) {
-        this.investment = investment;
-    }
 }

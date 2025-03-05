@@ -1,6 +1,7 @@
 package com.example.pidevinvesti.Entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,15 +48,12 @@ public class Account {
     @JsonProperty("status")
     private AccountStatus status;
 
-    // New field for Project accounts
     @OneToOne(cascade = CascadeType.ALL) // Cascade save operations to the Project entity
     @JoinColumn(name = "project_id", nullable = true) // Nullable because not all accounts have a project
-    @JsonBackReference
     private Project project;
 
     @OneToOne
     @JoinColumn(name = "investor_id", unique = true) // Ensures an investor has only one account
-    @JsonBackReference
     private Investor investor; // This links the account to an investor
 
     public Account(Long id, Client client, AccountType accountType, String accountNumber, double balance, double decouvertAutorise, double fraisMensuels, double tauxInteret, double plafondRetrait, AccountStatus status, Project project, Investor investor) {

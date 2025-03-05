@@ -92,7 +92,7 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
 
         for (Investment investment : investments) {
             // Fetch only transactions of type INVESTMENT
-            List<Transaction> transactions = transactionRepository.findByInvestmentAndType(investment, TransactionType.INVESTMENT);
+            List<Transaction> transactions = transactionRepository.findByType(TransactionType.INVESTMENT);
 
             for (Transaction transaction : transactions) {
                 LocalDate transactionDate = transaction.getDate().toInstant()
@@ -109,15 +109,17 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
 
                     // Save and process return
                     transactionRepository.save(transaction);
-                    ReturnInvestment(transaction);
+                    ReturnInvestment(investment.getInvestId());
                 }
             }
         }
     }
 
     @Override
-    public void ReturnInvestment(Transaction transaction) {
-        Investment investment = transaction.getInvestment();
+    public void ReturnInvestment(Integer investment_id) {
+        Investment investment = investmentRepository.findById(investment_id)
+                .orElseThrow(() -> new IllegalStateException("Investment not found"));
+
         Project project = investment.getProject();
 
         if (project == null || project.getCumulInvest().compareTo(BigDecimal.ZERO) == 0) {
@@ -133,36 +135,62 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
             throw new IllegalStateException("Investor or project account is missing.");
         }
 
-        // Calculate return on investment
+        // ✅ Calculate return on investment
         BigDecimal totalReturn = project.getTotalReturn();
-        BigDecimal share = investment.getAmount().divide(project.getCumulInvest(), RoundingMode.HALF_UP);
+        BigDecimal investmentAmount = investment.getAmount();
+
+        // Ensure valid share calculation
+        BigDecimal share = BigDecimal.ZERO;
+        if (project.getCumulInvest().compareTo(BigDecimal.ZERO) > 0) {
+            share = investmentAmount.divide(project.getCumulInvest(), 10, RoundingMode.HALF_UP);
+        }
+
         BigDecimal investmentReturnAmount = totalReturn.multiply(share);
 
-        // Calculate ROI percentage
-        BigDecimal roi = investmentReturnAmount.subtract(investment.getAmount())
-                .divide(investment.getAmount(), RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100));
+        // ✅ Ensure ROI is correctly calculated and not negative
+        BigDecimal roi = BigDecimal.ZERO;
+        if (investmentAmount.compareTo(BigDecimal.ZERO) > 0) {
+            roi = (investmentReturnAmount.subtract(investmentAmount))
+                    .divide(investmentAmount, 10, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100));
 
-        // Register the investment return
+            // If ROI is negative, set it to 0 (to avoid incorrect calculations)
+            if (roi.compareTo(BigDecimal.ZERO) < 0) {
+                roi = BigDecimal.ZERO;
+                investmentReturnAmount = investmentAmount; // Investor gets at least their initial amount
+            }
+        }
+
+        // ✅ Ensure the project account has enough funds before transferring
+        if (projectAccount.getBalance() == 0 || projectAccount.getBalance() < investmentReturnAmount.doubleValue()) {
+            throw new IllegalStateException("Insufficient funds in project account to return investment.");
+        }
+
+        // ✅ Register the investment return
         InvestmentReturn investmentReturn = new InvestmentReturn();
         investmentReturn.setInvestment(investment);
         investmentReturn.setRoiPercentage(roi);
         investmentReturn.setTotalReturn(investmentReturnAmount);
         investmentReturn.setPayoutDate(new Date());
-
-        // Save the investment return
+        investmentReturn.setInvestor(investor);
         investmentReturnRepository.save(investmentReturn);
 
-        // Process the transaction (credit investor)
-        Transaction returnTransaction = new Transaction();
-        returnTransaction.setAmount(investmentReturnAmount);
-        returnTransaction.setSenderAccount(projectAccount);  // Project paying back
-        returnTransaction.setReceiverAccount(investorAccount);  // Investor receiving
-        returnTransaction.setTransactionType(TransactionType.RETURN_ON_INVESTMENT);
-        returnTransaction.setInvestment(investment);
-        returnTransaction.setDate(new Date());
+        // ✅ Process the transaction
+        Transaction returnTransaction = transactionService.createTransaction(
+                investorAccount.getId(),
+                projectAccount.getId(),
+                investmentReturnAmount
+        );
 
+        transactionService.addTransaction(returnTransaction);
         transactionRepository.save(returnTransaction);
+
+        // ✅ Update account balances (subtract from project, add to investor)
+        projectAccount.setBalance(projectAccount.getBalance() - investmentReturnAmount.doubleValue());
+        investorAccount.setBalance(investorAccount.getBalance() + investmentReturnAmount.doubleValue());
+
+        accountRepository.save(projectAccount);
+        accountRepository.save(investorAccount);
     }
 
     @Override
@@ -201,6 +229,7 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
         Investment investment = new Investment();
         investment.setInvestor(investor);
         investment.setProject(project);
+        investment.setDescriptionInvest(project.getDescriptionProject());
         investment.setAmount(investmentAmount);
         investment.setStatusInvest(StatusInvest.ACCEPTED);
         investment.setInvestmentProgress(ProgressInvestment.IN_PROGRESS);
@@ -211,16 +240,10 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
         project.setCumulInvest(newTotalInvestment);
         projectRepository.save(project);
         // Save the investment
-        investment = investmentRepository.save(investment);
 
         // Create Transactions
         Transaction feeTransaction = transactionService.createTransaction(investorAccount.getId(), projectAccount.getId(), adminFee);
         Transaction investmentTransaction = transactionService.createTransaction(investorAccount.getId(), projectAccount.getId(), investmentAmount);
-
-        // Link transactions to investment
-        investment.setTransaction(feeTransaction);
-        investment.setTransaction(investmentTransaction);
-
         transactionService.addTransaction(investmentTransaction);
         transactionService.addTransaction(feeTransaction);
         // Send confirmation email
@@ -234,35 +257,9 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
 
         emailService.sendHtmlEmail(mail);
 */
-        return investmentRepository.save(investment);
-    }
-
-
-
-    @Override
-    public Investment affetcterTransactionToInvestment(Long idTransaction, Integer idInvestment) {
-        Investment investment = investmentRepository.findById(idInvestment)
-                    .orElseThrow(() -> new RuntimeException("Investment not found"));
-
-            Transaction transaction = transactionRepository.findById(idTransaction).orElse(null);
-
-            // Ensure each transaction is linked to the investment
-                transaction.setInvestment(investment);
-            // Save updated transactions
-            transactionRepository.save(transaction);
-
-            // Update investment with new transactions
-            investment.setTransaction(transaction);
-            return investmentRepository.save(investment);
-        }
-
-    @Override
-    public Investment desaffetcterTransactionFromInvestment(Integer idInvestment) {
-        Investment investment=investmentRepository.findById(idInvestment).orElse(null);
-        investment.setTransaction(null);
-        investmentRepository.save(investment);
         return investment;
     }
+
 
     @Override
     public List<Investment> findByStatus(StatusInvest status) {

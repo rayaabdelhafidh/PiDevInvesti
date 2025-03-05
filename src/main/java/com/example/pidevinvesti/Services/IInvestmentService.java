@@ -21,12 +21,9 @@ public interface IInvestmentService <Investment,ID>{
     public Investment AcceptInvestment(ID id);
     public Investment RefuseInvestment(ID id);
     public void Checkinvest();
-    public void ReturnInvestment(Transaction transaction);
+    public void ReturnInvestment(ID id);
     Investment Invest(long owner_id, BigDecimal amount_invested,Integer project_id);
     List<Investment> findByStatus(StatusInvest status);
 
-    Investment affetcterTransactionToInvestment(Long idTransaction, Integer idInvestment);
-
-    Investment desaffetcterTransactionFromInvestment(Integer idInvestment);
 
     }

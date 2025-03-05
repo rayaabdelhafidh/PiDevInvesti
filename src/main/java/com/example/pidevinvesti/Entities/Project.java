@@ -44,6 +44,17 @@ public class Project {
 
     private BigDecimal totalReturn; // The total revenue generated from this project
 
+    // New fields for recommendation system
+    @JsonProperty("sector")
+    private String sector; // Industry sector
+
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("riskLevel")
+    private RiskProfile riskLevel; // LOW, MEDIUM, HIGH
+
+    @JsonProperty("historicalROI")
+    private BigDecimal historicalROI; // Average ROI for the project
+
     @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     @JsonManagedReference
@@ -143,19 +154,9 @@ public class Project {
         this.investments = investments;
     }
 
-    public BigDecimal calculateTotalRevenue() {
-        if (investments == null || investments.isEmpty()) {
-            return BigDecimal.ZERO;
-        }
 
-        return investments.stream()
-                .map(Investment::getTransaction) // Get the transaction directly
-                .filter(transaction -> transaction != null && transaction.getTransactionType() == TransactionType.TRANSFERT) // Check for null and filter type
-                .map(Transaction::getAmount) // Get the amounts
-                .reduce(BigDecimal.ZERO, BigDecimal::add); // Sum all amounts
-    }
         public void updateTotalReturn() {
-        this.totalReturn = calculateTotalRevenue();
+        this.totalReturn = cumulInvest;
     }
 
 

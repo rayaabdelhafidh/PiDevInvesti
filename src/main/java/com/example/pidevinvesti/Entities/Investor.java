@@ -24,14 +24,18 @@ public class Investor extends User {
     private InvestorStatus investorStatus;
     @JsonProperty("investmentdate")
     private LocalDateTime investmentdate;
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("riskTolerance")
+    private RiskProfile riskTolerance; // LOW, MEDIUM, HIGH
+
+    @JsonProperty("preferredSectors")
+    private String preferredSectors; // Comma-separated list of sectors
 
     @OneToMany(mappedBy = "investor", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonManagedReference
     @JsonIgnore
     private List<Investment> investments;
 
     @OneToOne(mappedBy = "investor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
     @JsonIgnore
     private Account account; // Each Investor has only one Account
 }

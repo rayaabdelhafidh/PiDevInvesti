@@ -30,7 +30,6 @@ public class Investment {
     @Enumerated(EnumType.STRING)
     private StatusInvest statusInvest;
 
-
     @Enumerated(EnumType.STRING)
     private ProgressInvestment investmentProgress;
 
@@ -49,11 +48,6 @@ public class Investment {
     @JsonIgnore
     private List<InvestmentReturn> investmentReturns;
 
-    // New field for Project accounts
-    @OneToOne(cascade = CascadeType.ALL) // Cascade save operations to the Project entity
-    @JoinColumn(name = "transaction_id", nullable = true) // Nullable because not all accounts have a project
-    @JsonBackReference
-    private Transaction transaction;
 
     // Default constructor
     public Investment() {}
@@ -146,11 +140,5 @@ public class Investment {
         this.investmentReturns = investmentReturns;
     }
 
-    public Transaction getTransaction() {
-        return transaction;
-    }
 
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
-    }
 }

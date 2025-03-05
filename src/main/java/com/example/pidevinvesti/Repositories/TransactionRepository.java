@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction,Long> {
     List<Transaction> findAllByAccountId(Long accountId);
-    List <Transaction> findByInvestmentAndType(Investment investment, TransactionType type);
+    List <Transaction> findByType(TransactionType type);
 }
