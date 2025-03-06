@@ -26,8 +26,8 @@ public class DemandController {
     @Autowired
     ILoanRepo loanRepo;
     @PostMapping("add")
-    public Demand ajouterDemand(@RequestBody Demand demand, @RequestParam(required = true) Long packId) {
-        return DemandService.AddDemand(demand , packId);
+    public Demand ajouterDemand(@RequestBody Demand demand, @RequestParam(required = true) Long packId,@RequestParam(required = true) Long UserId) {
+        return DemandService.AddDemand(demand , packId,UserId);
     }
 
     @GetMapping("all")
@@ -58,12 +58,11 @@ public class DemandController {
 
     @PutMapping("/{demandId}/traiter")
     public ResponseEntity<String> traiterDemande(
-            @PathVariable Long demandId,
-            @RequestParam String status) {
+            @PathVariable Long demandId) {
 
         try {
 
-            DemandService.TraiterDemande(demandId, status);
+            DemandService.TraiterDemande(demandId);
 
             return ResponseEntity.ok("Demande traitée avec succès !");
 

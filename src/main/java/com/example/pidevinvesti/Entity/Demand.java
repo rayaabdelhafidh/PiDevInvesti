@@ -25,34 +25,37 @@ public class Demand {
     private int Duration ;
     @JsonProperty("DemandDate")
     private LocalDate DemandDate ;
-    @JsonProperty("Status")
+    @JsonProperty("status")
     @Enumerated(EnumType.STRING)
-    private DemandStatus Status;
+    private DemandStatus status;
 
-   @OneToOne(mappedBy = "demand")
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
+    @OneToOne(mappedBy = "demand")
    private Loan loan ;
 
     @ManyToOne
     @JoinColumn(name = "pack_id")
     private Pack pack;
 
-    @OneToMany(mappedBy = "demand", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Collateral> collaterals;
 
     public Pack getPack() {
         return pack;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public void setPack(Pack pack) {
         this.pack = pack;
-    }
-
-    public List<Collateral> getCollaterals() {
-        return collaterals;
-    }
-
-    public void setCollaterals(List<Collateral> collaterals) {
-        this.collaterals = collaterals;
     }
 
     public long getDemandId() {
@@ -88,11 +91,11 @@ public class Demand {
     }
 
     public DemandStatus getStatus() {
-        return Status;
+        return status;
     }
 
     public void setStatus(DemandStatus status) {
-        Status = status;
+        this.status = status;
     }
 
     public Loan getLoan() {

@@ -14,11 +14,13 @@ import java.util.List;
 @Entity
 public class Loan {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long LoanId ;
     private Float Amount;
     private Float InterestRate;
     private Date DateDebut ;
-
+    @Enumerated(EnumType.STRING)
+    private LoanStatut Status;
     @OneToOne
     private Demand demand ;
 
@@ -71,5 +73,13 @@ public class Loan {
 
     public void setInstallments(List<Installement> installments) {
         this.installments = installments;
+    }
+
+    public LoanStatut getStatus() {
+        return Status;
+    }
+
+    public void setStatus(LoanStatut status) {
+        Status = status;
     }
 }

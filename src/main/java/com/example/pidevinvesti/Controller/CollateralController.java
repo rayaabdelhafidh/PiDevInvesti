@@ -20,8 +20,8 @@ public class CollateralController {
     private ICollateralService collateralService;
 
     @PostMapping("/add")
-    public Collateral addCollateral(@RequestBody Collateral collateral) {
-        return collateralService.addCollateral(collateral);
+    public Collateral addCollateral(@RequestBody Collateral collateral , @RequestParam(required = true) Long UserId) {
+        return collateralService.addCollateral(collateral,UserId);
     }
 
     @GetMapping("/all")

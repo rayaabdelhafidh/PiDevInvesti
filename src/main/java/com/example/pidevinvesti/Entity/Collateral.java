@@ -25,11 +25,16 @@ public class Collateral {
     @JsonProperty("DocFilePath")
     private String DocFilePath; // Chemin du fichier téléchargé
 
-    @ManyToOne
-    @JoinColumn(name = "DemandId")
-    private Demand demand;
-
   //  @ManyToOne
+   // @JoinColumn(name = "DemandId")
+   // private Demand demand;
+
+    @ManyToOne
+    @JoinColumn(name = "idUser")
+    private User user;
+
+
+    //  @ManyToOne
     //@JoinColumn(name = "garant_id", nullable = true)
     //private User garant; // Garant (facultatif)
 
@@ -74,11 +79,12 @@ public class Collateral {
         DocFilePath = docFilePath;
     }
 
-    public Demand getDemande() {
-        return demand;
+
+    public User getUser() {
+        return user;
     }
 
-    public void setDemande(Demand demand) {
-        this.demand = demand;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

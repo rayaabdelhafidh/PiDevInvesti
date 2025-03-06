@@ -1,7 +1,11 @@
 package com.example.pidevinvesti.Service;
 
 import com.example.pidevinvesti.Entity.Collateral;
+import com.example.pidevinvesti.Entity.Demand;
+import com.example.pidevinvesti.Entity.User;
 import com.example.pidevinvesti.Repository.ICollateralRepo;
+import com.example.pidevinvesti.Repository.IDemandRepo;
+import com.example.pidevinvesti.Repository.UserRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,10 +24,17 @@ public class CollateralService implements ICollateralService {
 
     @Autowired
     private ICollateralRepo collateralRepository;
+    @Autowired
+    private UserRepo userRepo;
+    @Autowired
+    private IDemandRepo demandRepo;
 
 
     @Override
-    public Collateral addCollateral(Collateral collateral) {
+    public Collateral addCollateral(Collateral collateral ,Long UserId)
+    {
+        User user=userRepo.findById(UserId).get();
+        collateral.setUser(user);
         return collateralRepository.save(collateral);
     }
 
