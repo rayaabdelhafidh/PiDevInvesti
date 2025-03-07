@@ -15,12 +15,14 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.property.TextAlignment;
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -134,11 +136,29 @@ public class DemandService implements IDemandService {
             demand.setStatus(DemandStatus.ACCEPTE);
             System.out.println("aaaaaaaaaaaaaa");
             demandRepository.save(demand);
-            emailService.sendEmail(
-                    userEmail,
-                    "Demande acceptée",
-                    "Félicitations ! Votre demande a été acceptée et votre prêt a été créé.");
+          //  emailService.sendEmail(
+            //        userEmail,
+              //      "Demande acceptée",
+                //    "Félicitations ! Votre demande a été acceptée et votre prêt a été créé.");
+            //pdfService.generateProfessionalContractPdf(demand);
+
+
+            // 1. Générer le PDF du contrat
             pdfService.generateProfessionalContractPdf(demand);
+
+// 2. L'URL de ta page promo  http://192.168.0.199/promo/index.html
+            String promoPageUrl = "https://about.me/investi";
+
+// 3. Générer l'image du QR code contenant l'URL de la page promo
+            String qrCodeImagePath = EmailService.QrCodeGenerator.generateQrCodeImage(promoPageUrl);
+
+// 4. Envoyer l'email avec le QR code en pièce jointe
+            emailService.sendEmailWithQrCode(
+                    demand.getUser().getEmail(),
+                    "Votre demande acceptée - Offre spéciale",
+                    "Votre demande a été acceptée ! Scannez ce QR code pour découvrir notre offre spéciale.",
+                    qrCodeImagePath
+            );
             if ( demand.getStatus().equals(DemandStatus.ACCEPTE)) {
                 Loan loan = new Loan();
                 loan.setDateDebut(new Date());
@@ -171,6 +191,10 @@ public class DemandService implements IDemandService {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Status invalide : " + demand.getStatus());
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -233,7 +257,7 @@ public class DemandService implements IDemandService {
         if (ancienneteBancaireEnAnnees(user) >= 2) {
             score += 20;
         }
-
+        user.setScoreCredit(score);
         return score;
     }
 
