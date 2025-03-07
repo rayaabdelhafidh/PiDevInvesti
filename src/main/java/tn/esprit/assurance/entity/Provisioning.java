@@ -1,5 +1,6 @@
 package tn.esprit.assurance.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,14 +22,16 @@ public class Provisioning {
 
     @ManyToOne
     @JoinColumn(name = "contractId")
+    @JsonIgnore
+
     private Contract contract;
 
     private BigDecimal psap;
     private BigDecimal bestEstimate;
     private BigDecimal riskMargin;
     private LocalDate calculationDate;
-    @OneToMany(mappedBy = "provisioning")
-    private List<Sinister> sinistres; // Les sinistres liés au provisionnement
+   /* @OneToMany(mappedBy = "provisioning")
+    private List<Sinister> sinistres; // Les sinistres liés au provisionnement*/
 
     // Getters and Setters
 }

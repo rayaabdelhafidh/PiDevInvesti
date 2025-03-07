@@ -12,7 +12,7 @@ public interface ISinisterServices {
 
     Optional<Sinister> getSinisterById(Long id);  // Récupérer un sinistre par son ID
 
-    Sinister updateSinister(Long id, Sinister sinisterDetails);  // Modifier un sinistre
+    Sinister updateSinister( Sinister sinisterDetails);  // Modifier un sinistre
 
     void deleteSinister(Long id);  // Supprimer un sinistre
 

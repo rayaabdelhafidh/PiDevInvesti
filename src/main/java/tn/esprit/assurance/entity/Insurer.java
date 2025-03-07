@@ -1,5 +1,7 @@
 package tn.esprit.assurance.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +22,8 @@ public class Insurer {
 
 
         @OneToMany(mappedBy = "approvedBy")
+        @JsonIgnore
+
         private List<Sinister> approvedSinisters;
 
         // Getters et Setters
