@@ -1,12 +1,12 @@
 package com.example.investi.Controllers;
 
+import com.example.investi.Entities.Contract;
+import com.example.investi.Services.IContractServices;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.investi.Entities.Contract;
-import com.example.investi.Services.IContractServices;
+
 
 import java.util.List;
 
@@ -18,33 +18,29 @@ public class ContractController {
     @Autowired
     private IContractServices contractService;
 
-    @PostMapping("/add")
-    public ResponseEntity<Contract> createContract(@RequestBody Contract contract) {
-        return ResponseEntity.ok(contractService.addContract(contract));
+    @PostMapping("/add/{clientId}")
+    public Contract createContract(@PathVariable Long clientId, @RequestBody Contract contract) {
+        return contractService.addContract(clientId, contract);
     }
 
     @GetMapping
-    public ResponseEntity<List<Contract>> getAllContracts() {
-        return ResponseEntity.ok(contractService.getAllContracts());
+    public List<Contract> getAllContracts() {
+        return contractService.getAllContracts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Contract> getContractById(@PathVariable Long id) {
+    public Contract getContractById(@PathVariable Long id) {
         return contractService.getContractById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new RuntimeException("Contract not found"));
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<Contract> updateContract( @RequestBody Contract contract) {
-        Contract updatedContract = contractService.updateContract(contract);
-        return ResponseEntity.ok(updatedContract);
+    @PutMapping("/update/{id}")
+    public Contract updateContract(@PathVariable Long id, @RequestBody Contract contract) {
+        return contractService.updateContract(id, contract);
     }
-
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
+    public void deleteContract(@PathVariable Long id) {
         contractService.deleteContract(id);
-        return ResponseEntity.noContent().build();
     }
 }

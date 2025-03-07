@@ -1,7 +1,8 @@
 package com.example.investi.Repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.investi.Entities.Sinister;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 
 import java.util.List;
 

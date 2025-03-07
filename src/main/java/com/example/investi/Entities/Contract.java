@@ -20,6 +20,13 @@ public class Contract {
         HEALTH,  // Assurance Santé
         CREDIT   // Assurance Crédit
     }
+    public enum ContractStatus {
+        ACTIVE,
+        INACTIVE,
+        PENDING,
+        CANCELLED
+    }
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +36,7 @@ public class Contract {
 
     @ManyToOne
     @JoinColumn(name = "client_id")
-      // Vérifie cette annotation
+    @JsonIgnore
     private Client client;
 
 
@@ -46,18 +53,34 @@ public class Contract {
     private LocalDate endDate;
 
     @JsonProperty("insured_amount")
-    private BigDecimal insuredAmount;
+    private double insuredAmount;
 
     @JsonProperty("annual_premium")
-    private BigDecimal annualPremium;
+    private double annualPremium;
 
+    @Enumerated(EnumType.STRING)
     @JsonProperty("status")
-    private String status;
+    private ContractStatus status;
+
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("contract")  // Empêche la récursion infinie
     //@JsonProperty("sinister_id")         // Ajoute "sinisters" au JSON pour Postman
+    @JsonIgnore
+
     private List<Sinister> sinisters;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.status == null) {
+            this.status = ContractStatus.PENDING; // Si aucun statut n'est spécifié, mettre "PENDING" par défaut
+        }
+
+        if (this.status == ContractStatus.ACTIVE) {
+            this.startDate = LocalDate.now(); // La date de début est la date actuelle
+            this.endDate = LocalDate.now().plusYears(1); // La date de fin est dans un an
+        }
+    }
 
 
 }
