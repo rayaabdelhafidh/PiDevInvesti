@@ -1,0 +1,51 @@
+/* Basic layout and spacing */
+.stock-chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 8px;
+    width: 80%;
+    margin: 0 auto;
+}
+
+/* Dropdown list styling */
+.dropdown-container {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.dropdown {
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    width: 150px;
+}
+
+/* Loading message styling */
+.loading-message {
+    font-size: 18px;
+    font-weight: bold;
+    color: #007bff;
+    margin-top: 20px;
+}
+
+/* Error message styling */
+.error-message {
+    font-size: 18px;
+    font-weight: bold;
+    color: red;
+    margin-top: 20px;
+}
+
+/* Canvas styling */
+canvas {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
