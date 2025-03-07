@@ -10,11 +10,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 
+@Entity
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity
+
+
 public class Transaction {
 
     @Id

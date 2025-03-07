@@ -1,5 +1,6 @@
 package com.example.investi.Entities;
 
+
 import com.example.investi.Entities.Investment;
 import com.example.investi.Entities.ProjectStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;

@@ -1,13 +1,9 @@
-package com.example.investi.Repositories;
+package com.example.investi.Services;
 import com.example.investi.Entities.User;
 
 import java.util.List;
-import java.util.Optional;
-import com.example.investi.Entities.User;
+
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface IUserService {

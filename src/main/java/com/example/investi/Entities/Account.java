@@ -7,11 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
+import java.time.LocalDate;
+
+@Entity
 @Getter
 @Setter
-@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class Account {
 
     @Id
@@ -28,6 +30,9 @@ public class Account {
 
     @JsonProperty("accountNumber")
     private String accountNumber;
+
+    @Column(unique = true)
+    private String ethereumAddress;
 
     @JsonProperty("balance")
     private double balance;
@@ -48,18 +53,35 @@ public class Account {
     @JsonProperty("status")
     private AccountStatus status;
 
-    // New field for Project accounts
-    @OneToOne(cascade = CascadeType.ALL) // Cascade save operations to the Project entity
-    @JoinColumn(name = "project_id", nullable = true) // Nullable because not all accounts have a project
+    // Relation avec Project (si nécessaire)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "project_id", nullable = true)
     private Project project;
+
+    // Relation un-à-un avec CarteBancaire (chaque compte a une seule carte)
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonProperty("carteBancaire")
+    private CarteBancaire carteBancaire;
 
     // Constructor with Client
     public Account(Client client) {
         this.client = client;
+        generateDefaultCard(); // Générer une carte par défaut lors de la création du compte
     }
 
-    // Method to associate a project with the account
+    // Méthode pour associer un projet au compte
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    // Méthode pour générer une carte par défaut lors de la création du compte
+    @PostPersist
+    protected void generateDefaultCard() {
+        if (this.carteBancaire == null) { // Vérifier si aucune carte n'existe déjà
+            CarteBancaire defaultCard = new CarteBancaire(this);
+            defaultCard.generateCardDetails(); // Générer les détails de la carte
+            defaultCard.setSpendingLimit(1000.0); // Définir un plafond de dépense par défaut
+            this.carteBancaire = defaultCard; // Associer la carte au compte
+        }
     }
 }

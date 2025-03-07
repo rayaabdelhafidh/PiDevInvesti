@@ -1,8 +1,6 @@
 package com.example.investi.Entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -28,15 +26,22 @@ public class Investment {
     @Enumerated(EnumType.STRING)
     private StatusInvest statusInvest;
 
-
     @Enumerated(EnumType.STRING)
     private ProgressInvestment investmentProgress;
 
     @ManyToOne
     @JsonIgnore
+    @JsonBackReference
     private Project project;
 
-    @OneToMany(mappedBy = "investment",fetch =FetchType.EAGER)
+    @ManyToOne
+    @JsonIgnore
+    @JsonBackReference
+    private Investor investor;
+
+    @OneToMany(mappedBy = "investment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @JsonIgnore
     private List<InvestmentReturn> investmentReturns;
 
 
@@ -113,6 +118,14 @@ public class Investment {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public Investor getInvestor() {
+        return investor;
+    }
+
+    public void setInvestor(Investor investor) {
+        this.investor = investor;
     }
 
     public List<InvestmentReturn> getInvestmentReturns() {

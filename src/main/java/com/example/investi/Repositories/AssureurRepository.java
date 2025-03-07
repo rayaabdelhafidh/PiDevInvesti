@@ -1,10 +1,9 @@
 package com.example.investi.Repositories;
 
-import com.example.investiprojet.entities.User;
+import com.example.investi.Entities.Assureur;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface  UserRepository extends JpaRepository<User,Long> {
-
+public interface AssureurRepository extends JpaRepository<Assureur,Long> {
 }

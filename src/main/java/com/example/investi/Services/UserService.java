@@ -1,7 +1,6 @@
 package com.example.investi.Services;
 
 import com.example.investi.Entities.User;
-import com.example.investi.Repositories.IUserService;
 import com.example.investi.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

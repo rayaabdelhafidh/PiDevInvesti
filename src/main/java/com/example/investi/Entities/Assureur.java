@@ -6,6 +6,5 @@ import jakarta.persistence.OneToMany;
 @Entity
 public class Assureur extends User {
 
-    // @OneToMany(mappedBy = "approvedBy")
-   // private List<Sinister> approvedSinisters; //
+
 }

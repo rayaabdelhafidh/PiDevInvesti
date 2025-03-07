@@ -2,8 +2,10 @@ package com.example.investi.Controllers;
 
 import com.example.investi.Entities.Account;
 import com.example.investi.Entities.AccountType;
+import com.example.investi.Entities.CarteBancaire;
 import com.example.investi.Entities.Project;
 import com.example.investi.Services.AccountService;
+import com.example.investi.Services.CarteBancaireService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,8 @@ public class AccountController {
 
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private CarteBancaireService carteBancaireService;
 
     @PostMapping("/create/{accountType}")
     public ResponseEntity<Account> createAccount(
@@ -43,6 +47,15 @@ public class AccountController {
 
         // Call the service to create the account
         Account createdAccount = accountService.createAccount(account, clientId, type, project);
+
+        // Générer automatiquement une carte bancaire pour le compte créé
+        if (createdAccount != null) {
+            CarteBancaire generatedCarte = carteBancaireService.createCarteBancaire(createdAccount.getId());
+            if (generatedCarte != null) {
+                createdAccount.setCarteBancaire(generatedCarte); // Associer la carte au compte
+            }
+        }
+
         return ResponseEntity.ok(createdAccount);
     }
 
