@@ -1,13 +1,18 @@
 package com.example.investiprojet.controllers;
 
 import com.example.investiprojet.entities.Training;
+import com.example.investiprojet.entities.TrainingCategory;
+import com.example.investiprojet.entities.TrainingLevel;
+import com.example.investiprojet.services.ExcelExportService;
 import com.example.investiprojet.services.ITrainingService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +22,8 @@ import java.util.Optional;
 public class TrainingController {
     @Autowired
     private ITrainingService iTrainingService ;
+    @Autowired
+    private ExcelExportService excelExportService;
 
     @PostMapping("create")
     public Training creatingTraining(@RequestBody Training training){
@@ -65,6 +72,21 @@ public class TrainingController {
     @GetMapping("/level/{level}")
     public List<Training> getTrainingsByLevel(@PathVariable String level) {
         return iTrainingService.getTrainingsByLevel(level);
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<Training>> searchTrainings(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) TrainingCategory category,
+            @RequestParam(required = false) TrainingLevel level,
+            @RequestParam(required = false) Integer maxDuration) {
+
+        List<Training> trainings = iTrainingService.searchTrainings(title, category, level, maxDuration);
+        return ResponseEntity.ok(trainings);
+    }
+    @GetMapping("/generateExcel")
+    public void generateExcel(HttpServletResponse response) throws IOException {
+        excelExportService.generateFormationHistoryExcel( (HttpServletResponse) response);
+
     }
 }
 

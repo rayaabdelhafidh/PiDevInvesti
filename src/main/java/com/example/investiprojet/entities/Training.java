@@ -27,6 +27,9 @@ public class Training {
     @Enumerated(EnumType.STRING)
     private TrainingLevel level;
 
+    @Enumerated(EnumType.STRING)
+    private TrainingStatus status = TrainingStatus.PENDING;
+
     //@Column(updatable = false)
     //private LocalDateTime createdAt = LocalDateTime.now();
 
