@@ -2,6 +2,8 @@ package com.example.investi.Repositories;
 
 import com.example.investi.Entities.Account;
 import com.example.investi.Entities.AccountType;
+import com.example.investi.Entities.Investor;
+import com.example.investi.Entities.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +18,8 @@ public interface AccountRepository extends JpaRepository<Account,Long> {
     List<Account> findByClientIdAndAccountType(@Param("clientId") Long clientId, @Param("accountType") AccountType accountType);
 
     List<Account> findByClientId(Long clientId);
+
+    Account findByInvestor(Investor investor);
+
+    Account findByProject(Project project);
 }

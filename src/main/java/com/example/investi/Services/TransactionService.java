@@ -246,5 +246,9 @@ public class TransactionService {
             throw new RuntimeException("Error generating PDF", e);
         }
     }
+    public Transaction addTransaction(Transaction transaction) {
+        return transactionRepository.save(transaction);
+    }
+
 
 }

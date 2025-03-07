@@ -1,5 +1,5 @@
 package com.example.investi.Entities;
-import com.example.investi.Entities.User;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -13,7 +13,6 @@ import java.util.List;
 @Getter
 @Setter
 public class Investor extends User {
-
 
     @JsonProperty("investamount")
     private double investamount;
@@ -35,7 +34,7 @@ public class Investor extends User {
     @JsonIgnore
     private List<Investment> investments;
 
-    /*@OneToOne(mappedBy = "investor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "investor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
-    private Account account;*/
+    private Account account; // Each Investor has only one Account
 }

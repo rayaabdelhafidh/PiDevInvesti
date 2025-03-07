@@ -161,7 +161,7 @@ public class UserControllers {
             case "CLIENT":
                 return ResponseEntity.ok(clientService.AddClient((Client) user));
             case "INVESTOR":
-                return ResponseEntity.ok(investorService.AddInvestor((Investor) user));
+                return ResponseEntity.ok(investorService.addInvestor((Investor) user));
             case "TRAINER":
                 return ResponseEntity.ok(trainerService.AddTrainer((Trainer) user));
             case "ASSUREUR":
@@ -301,7 +301,7 @@ public class UserControllers {
             case "CLIENT":
                 return ResponseEntity.ok(clientService.updateClient((Client) user));
             case "INVESTOR":
-                return ResponseEntity.ok(investorService.UpdateInvestor((Investor) user));
+                return ResponseEntity.ok(investorService.updateInvestor((Investor) user));
             case "TRAINER":
                 return ResponseEntity.ok(trainerService.UpdateTrainer((Trainer) user));
             case "ASSUREUR":
@@ -317,7 +317,7 @@ public class UserControllers {
                 clientService.deleteClient(id);
                 break;
             case "INVESTOR":
-                investorService.DeleteInvestor(id);
+                investorService.deleteInvestor(id);
                 break;
             case "TRAINER":
                 trainerService.DeleteTrainer(id);
@@ -338,7 +338,7 @@ public class UserControllers {
                 users = clientService.getAllClients();
                 break;
             case "INVESTOR":
-                users = investorService.GetAllInvestors();
+                users = investorService.getAllInvestors();
                 break;
             case "TRAINER":
                 users = trainerService.GetAllTrainers();

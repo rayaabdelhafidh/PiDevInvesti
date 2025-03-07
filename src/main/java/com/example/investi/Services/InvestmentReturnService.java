@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class InvestmentReturnService implements IInvestmentService<InvestmentReturn, Integer>{
+public class InvestmentReturnService implements IInvestmentReturnService<InvestmentReturn, Integer>{
     @Autowired
     private InvestmentReturnRepository investmentReturnRepository;
     @Override

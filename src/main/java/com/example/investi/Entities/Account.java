@@ -63,6 +63,10 @@ public class Account {
     @JsonProperty("carteBancaire")
     private CarteBancaire carteBancaire;
 
+    @OneToOne
+    @JoinColumn(name = "investor_id", unique = true) // Ensures an investor has only one account
+    private Investor investor; //
+
     // Constructor with Client
     public Account(Client client) {
         this.client = client;

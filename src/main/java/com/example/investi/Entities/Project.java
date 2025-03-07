@@ -1,9 +1,8 @@
 package com.example.investi.Entities;
 
-
-import com.example.investi.Entities.Investment;
-import com.example.investi.Entities.ProjectStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
@@ -19,6 +18,9 @@ public class Project {
 
     @JsonProperty("projectName")
     private String projectName;
+    @JsonProperty("projectDuration")
+
+    private int projectDuration;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     @Temporal(TemporalType.DATE)
@@ -40,7 +42,24 @@ public class Project {
 
     private BigDecimal totalReturn; // The total revenue generated from this project
 
-    @OneToMany(mappedBy = "project",fetch =FetchType.EAGER)
+    // New fields for recommendation system
+    @JsonProperty("sector")
+    private String sector; // Industry sector
+
+    @Enumerated(EnumType.STRING)
+    @JsonProperty("riskLevel")
+    private RiskProfile riskLevel; // LOW, MEDIUM, HIGH
+
+    @JsonProperty("historicalROI")
+    private BigDecimal historicalROI; // Average ROI for the project
+
+    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JsonManagedReference
+    private Account account; // Each Project has one Account
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    @JsonManagedReference
     private List<Investment> investments;
 
     // Default constructor
@@ -124,6 +143,7 @@ public class Project {
         this.totalReturn = totalReturn;
     }
 
+
     public List<Investment> getInvestments() {
         return investments;
     }
@@ -133,4 +153,47 @@ public class Project {
     }
 
 
+        public void updateTotalReturn() {
+        this.totalReturn = cumulInvest;
+    }
+
+    public int getProjectDuration() {
+        return projectDuration;
+    }
+
+    public void setProjectDuration(int projectDuration) {
+        this.projectDuration = projectDuration;
+    }
+
+    public String getSector() {
+        return sector;
+    }
+
+    public void setSector(String sector) {
+        this.sector = sector;
+    }
+
+    public RiskProfile getRiskLevel() {
+        return riskLevel;
+    }
+
+    public void setRiskLevel(RiskProfile riskLevel) {
+        this.riskLevel = riskLevel;
+    }
+
+    public BigDecimal getHistoricalROI() {
+        return historicalROI;
+    }
+
+    public void setHistoricalROI(BigDecimal historicalROI) {
+        this.historicalROI = historicalROI;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 }

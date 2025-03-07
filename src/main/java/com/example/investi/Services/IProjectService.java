@@ -1,22 +1,29 @@
 package com.example.investi.Services;
 
+import com.example.investi.Entities.InvestmentReturn;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public interface IProjectService <T,ID>{
-    T save(T entity);
+public interface IProjectService <Project,ID>{
+    Project save(Project entity);
 
-    T add (T entity);
-    public BigDecimal calculateTotalInvestment(int projectId) ;
+    Project add (Project entity);
+    BigDecimal calculateTotalInvestment(ID id) ;
 
-    Optional<T> findById(ID id);
 
-    T update (ID id, T entity);
-    List<T> findAll();
+    Optional<Project> findById(ID id);
 
+    Project update (ID id, Project entity);
+    List<Project> findAll();
+
+    Project desaffetcterInvestmentsToProject(ID id);
 
     void deleteById(ID id);
 
-    void delete(T entity);
-}
+    void delete(Project entity);
+    void updateProjectInvestmentTotal(ID id);
+    void calculateAndDistributeROI(ID id);
+    List<InvestmentReturn> getRelatedInvestmentReturns(ID id);
+    }

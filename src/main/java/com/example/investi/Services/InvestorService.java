@@ -9,75 +9,51 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class InvestorService {
+public class InvestorService implements IInvestorService<Investor, Long> {
 
     @Autowired
     private InvestorRepository investorRepository;
 
-
-    public Investor AddInvestor(Investor investor) {
+    // Create or Update Investor
+    public Investor saveInvestor(Investor investor) {
         return investorRepository.save(investor);
     }
 
-
-    public Investor UpdateInvestor(Investor investor) {
-        Optional<Investor> existingInvestor = investorRepository.findById(investor.getId());
-        if (existingInvestor.isEmpty()) {
-            throw new IllegalArgumentException("Investor not found with ID: " + investor.getId());
-        }
-
-        Investor updatedInvestor = existingInvestor.get();
-        if (investor.getFirstName() != null) {
-            updatedInvestor.setFirstName(investor.getFirstName());
-        }
-        if (investor.getLastName() != null) {
-            updatedInvestor.setLastName(investor.getLastName());
-        }
-        if (investor.getEmail() != null) {
-            updatedInvestor.setEmail(investor.getEmail());
-        }
-        if (investor.getPassword() != null) {
-            updatedInvestor.setPassword(investor.getPassword());
-        }
-        if (investor.getAdresse() != null) {
-            updatedInvestor.setAdresse(investor.getAdresse());
-        }
-        if (investor.getPhonenumber() != null) {
-            updatedInvestor.setPhonenumber(investor.getPhonenumber());
-        }
-        if (investor.getInvestamount() != 0) {
-            updatedInvestor.setInvestamount(investor.getInvestamount());
-        }
-        if (investor.getDescription() != null) {
-            updatedInvestor.setDescription(investor.getDescription());
-        }
-        if (investor.getInvestorStatus() != null) {
-            updatedInvestor.setInvestorStatus(investor.getInvestorStatus());
-        }
-        if (investor.getInvestmentdate() != null) {
-            updatedInvestor.setInvestmentdate(investor.getInvestmentdate());
-        }
-
-        return investorRepository.save(updatedInvestor);
+    // Get Investor by ID
+    public Investor getInvestorById(Long id) {
+        return investorRepository.findById(id).orElse(null);
     }
 
-    /**
-     * Delete an investor by ID.
-     *
-     * @param id The ID of the investor to delete.
-     */
-    public void DeleteInvestor(Long id) {
-        investorRepository.deleteById(id);
-    }
-
-
-    public Investor GetInvestorById(Long id) {
-        return investorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Investor not found with ID: " + id));
-    }
-
-
-    public List<Investor> GetAllInvestors() {
+    // Get All Investors
+    public List<Investor> getAllInvestors() {
         return investorRepository.findAll();
+    }
+
+    // Update Investor
+    public Investor updateInvestor(Investor investorDetails) {
+        Optional<Investor> optionalInvestor = investorRepository.findById(investorDetails.getId());
+        if (optionalInvestor.isPresent()) {
+            Investor investor = optionalInvestor.get();
+            investor.setFirstName(investorDetails.getFirstName()); // Exemple de mise à jour d'un champ
+            investor.setEmail(investorDetails.getEmail());
+            investor.setPhonenumber(investorDetails.getPhonenumber());
+            return investorRepository.save(investor);
+        }
+        return null;
+    }
+
+    public Investor addInvestor(Investor investor) {
+        return saveInvestor(investor);
+    }
+    // Delete Investor
+    public boolean deleteInvestor(Long id) {
+        if (investorRepository.existsById(id)) {
+            investorRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+    public Investor GetInvestorById(Long id) {
+        return getInvestorById(id);
     }
 }
