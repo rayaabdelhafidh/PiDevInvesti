@@ -1,7 +1,5 @@
 package com.example.investi.Entities;
 
-
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,19 +12,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class Notification {
+public class Participation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String message;
-
-    private boolean isRead = false;
-
-    private LocalDateTime createdAt;
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
 
     @ManyToOne
-    private Client client;
+    @JoinColumn(name = "event_id")
+    private Event event;
+
+    private LocalDateTime participationDate;
+    private String status; // Par exemple : "Inscrit", "Terminé", etc.
 
 
 }

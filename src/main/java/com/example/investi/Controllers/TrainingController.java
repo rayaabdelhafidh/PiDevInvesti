@@ -1,13 +1,19 @@
 package com.example.investi.Controllers;
 
-import com.example.investi.Entities.Training;
-import com.example.investi.Repositories.ITrainingService;
 
+
+import com.example.investi.Entities.Training;
+import com.example.investi.Entities.TrainingCategory;
+import com.example.investi.Entities.TrainingLevel;
+import com.example.investi.Services.ExcelExportService;
+import com.example.investi.Services.ITrainingService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +23,8 @@ import java.util.Optional;
 public class TrainingController {
     @Autowired
     private ITrainingService iTrainingService ;
+    @Autowired
+    private ExcelExportService excelExportService;
 
     @PostMapping("create")
     public Training creatingTraining(@RequestBody Training training){
@@ -65,6 +73,21 @@ public class TrainingController {
     @GetMapping("/level/{level}")
     public List<Training> getTrainingsByLevel(@PathVariable String level) {
         return iTrainingService.getTrainingsByLevel(level);
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<Training>> searchTrainings(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) TrainingCategory category,
+            @RequestParam(required = false) TrainingLevel level,
+            @RequestParam(required = false) Integer maxDuration) {
+
+        List<Training> trainings = iTrainingService.searchTrainings(title, category, level, maxDuration);
+        return ResponseEntity.ok(trainings);
+    }
+    @GetMapping("/generateExcel")
+    public void generateExcel(HttpServletResponse response) throws IOException {
+        excelExportService.generateFormationHistoryExcel( (HttpServletResponse) response);
+
     }
 }
 

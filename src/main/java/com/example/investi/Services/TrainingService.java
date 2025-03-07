@@ -1,9 +1,10 @@
 package com.example.investi.Services;
 
+
 import com.example.investi.Entities.Training;
 import com.example.investi.Entities.TrainingCategory;
 import com.example.investi.Entities.TrainingLevel;
-import com.example.investi.Repositories.ITrainingService;
+import com.example.investi.Entities.TrainingStatus;
 import com.example.investi.Repositories.TrainingRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class TrainingService implements ITrainingService {
     @Autowired
     private TrainingRepository trainingRepository;
+
 
     @Override
     public Training createTraining(Training training) {
@@ -69,6 +71,8 @@ public class TrainingService implements ITrainingService {
 
     }
 
+    @Override
+
     public List<Training> getTrainingsByCategory(String category) {
         try {
             TrainingCategory trainingCategory = TrainingCategory.valueOf(category.toUpperCase());
@@ -78,6 +82,7 @@ public class TrainingService implements ITrainingService {
         }
     }
 
+    @Override
     public List<Training> getTrainingsByLevel(String level) {
         try {
             TrainingLevel trainingLevel = TrainingLevel.valueOf(level.toUpperCase());
@@ -86,4 +91,41 @@ public class TrainingService implements ITrainingService {
             throw new RuntimeException("Invalid level: " + level);
         }
     }
+
+    @Override
+    public List<Training> getPendingTrainings() {
+        return trainingRepository.findByStatus(TrainingStatus.PENDING);
+    }
+    // Valider une formation
+    @Override
+    public void approveTraining(Long trainingId) {
+        Training training = trainingRepository.findById(trainingId).orElseThrow();
+        training.setStatus(TrainingStatus.APPROVED);
+        trainingRepository.save(training);
+    }
+
+    // Rejeter une formation
+    @Override
+    public void rejectTraining(Long trainingId) {
+        Training training = trainingRepository.findById(trainingId).orElseThrow();
+        training.setStatus(TrainingStatus.REJECTED);
+        trainingRepository.save(training);
+    }
+
+    @Override
+    public List<Training> searchTrainings(String title, TrainingCategory category, TrainingLevel level, Integer maxDuration) {
+        if (title != null) {
+            return trainingRepository.findByTitleContainingIgnoreCase(title);
+        } else if (category != null) {
+            return trainingRepository.findByCategory(category);
+        } else if (level != null) {
+            return trainingRepository.findByLevel(level);
+        } else if (maxDuration != null) {
+            return trainingRepository.findByDurationLessThan(maxDuration);
+        }
+        return trainingRepository.findByStatus(TrainingStatus.APPROVED); // Par défaut, afficher les formations approuvées
+    }
+
+
+
 }
