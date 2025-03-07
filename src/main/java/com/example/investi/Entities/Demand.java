@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @AllArgsConstructor
@@ -22,11 +23,86 @@ public class Demand {
     @JsonProperty("Duration")
     private int Duration ;
     @JsonProperty("DemandDate")
-    private Date DemandDate ;
-    @JsonProperty("Status")
+    private LocalDate DemandDate ;
+    @JsonProperty("status")
     @Enumerated(EnumType.STRING)
-    private DemandStatus Status;
-   @OneToOne
-   private Loan loan ;
+    private DemandStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    @JsonProperty("client")
+    private Client user;
+
+
+    @OneToOne(mappedBy = "demand")
+    private Loan loan ;
+
+    @ManyToOne
+    @JoinColumn(name = "pack_id")
+    private Pack pack;
+
+
+    public Pack getPack() {
+        return pack;
+    }
+
+    public Client getUser() {
+        return user;
+    }
+
+    public void setUser(Client user) {
+        this.user = user;
+    }
+
+    public void setPack(Pack pack) {
+        this.pack = pack;
+    }
+
+    public long getDemandId() {
+        return DemandId;
+    }
+
+    public void setDemandId(long demandId) {
+        DemandId = demandId;
+    }
+
+    public float getAmount() {
+        return Amount;
+    }
+
+    public void setAmount(float amount) {
+        Amount = amount;
+    }
+
+    public int getDuration() {
+        return Duration;
+    }
+
+    public void setDuration(int duration) {
+        Duration = duration;
+    }
+
+    public LocalDate getDemandDate() {
+        return DemandDate;
+    }
+
+    public void setDemandDate(LocalDate demandDate) {
+        DemandDate = demandDate;
+    }
+
+    public DemandStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DemandStatus status) {
+        this.status = status;
+    }
+
+    public Loan getLoan() {
+        return loan;
+    }
+
+    public void setLoan(Loan loan) {
+        this.loan = loan;
+    }
 }
