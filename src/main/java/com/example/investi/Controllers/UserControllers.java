@@ -1,19 +1,17 @@
 package com.example.investi.Controllers;
 
-import com.example.investi.Repositories.IUserService;
+import com.example.investi.Services.IUserService;
+import com.example.investi.Services.IEmailService;
+import com.example.investi.Utils.JwtUtil;
 import com.example.investi.Entities.User;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 
 @RestController
@@ -24,16 +22,39 @@ import java.util.List;
 
 public class UserControllers {
 @Autowired
-    private IUserService UserService ;
+    private IUserService UserService;
+    private IEmailService emailService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @PostMapping("/add")
-    public User addUser(@RequestBody User User){
-        return UserService.createUser(User);
+    public void addUser(@RequestBody User User){
+        User.setEnabled(false); // L'utilisateur doit activer son compte
+
+        User createdUser = UserService.createUser(User);
+
+        String token = jwtUtil.generateToken(createdUser.getEmail());
+
+        String activationLink =  "<a href=\"http://localhost:8088/api/auth/activate" + "/"   + createdUser.getEmail() + "/" + token +"\">Activate</a> " ;
+
+        try {
+            emailService.sendEmail(
+                createdUser.getEmail(),
+                "Activate your InvestiProjet account",
+                "Please click the following link to activate your account: " + activationLink
+            );
+        } catch (Exception e) {
+            log.error("Erreur lors de l'envoi de l'email d'activation à {}", createdUser.getEmail(), e);
+        }
+
     }
+
+
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID")
     public User getUserById(@PathVariable Long id) {
-        return (UserService.getUserById(id));
+        return UserService.getUserById(id);
 
     }
     @GetMapping("/all")
@@ -52,5 +73,3 @@ public class UserControllers {
     }
 
 }
-
-
