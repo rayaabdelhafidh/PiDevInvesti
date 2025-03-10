@@ -1,7 +1,6 @@
 package com.example.investi.Services;
 
 import com.example.investi.Entities.User;
-import com.example.investi.Repositories.IUserService;
 import com.example.investi.Repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 
-@Service
+    @Service
     @AllArgsConstructor
     public class UserService implements IUserService {
 
@@ -25,6 +24,11 @@ import java.util.List;
         @Override
         public User getUserById(Long id) {
             return userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
+
+        public User getUserByEmail(String email) {
+            return userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
         }
 
@@ -51,6 +55,7 @@ import java.util.List;
         public void deleteUser(Long id) {
             userRepository.deleteById(id);
         }
+        
     }
 
 
