@@ -18,25 +18,33 @@ public class InvestmentReturnController {
     private InvestmentReturnService investmentReturnService;
 
     @PostMapping("/add")
-    public ResponseEntity<InvestmentReturn> addInvestmentReturn(@RequestBody InvestmentReturn investmentReturn) {
+    public ResponseEntity<InvestmentReturn> addInvestmentReturn(
+            @RequestHeader("Authorization") String token,
+            @RequestBody InvestmentReturn investmentReturn) {
         InvestmentReturn savedInvestmentReturn = investmentReturnService.add(investmentReturn);
         return ResponseEntity.ok(savedInvestmentReturn);
     }
 
     @GetMapping
-    public ResponseEntity<List<InvestmentReturn>> getAllInvestmentReturns() {
+    public ResponseEntity<List<InvestmentReturn>> getAllInvestmentReturns(
+            @RequestHeader("Authorization") String token
+            ) {
         List<InvestmentReturn> investmentReturns = investmentReturnService.findAll();
         return ResponseEntity.ok(investmentReturns);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<InvestmentReturn> updateInvestmentReturn(@PathVariable Integer id, @RequestBody InvestmentReturn investmentReturn) {
+    public ResponseEntity<InvestmentReturn> updateInvestmentReturn(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer id, @RequestBody InvestmentReturn investmentReturn) {
         InvestmentReturn updatedInvestmentReturn = investmentReturnService.update(id, investmentReturn);
         return (updatedInvestmentReturn != null) ? ResponseEntity.ok(updatedInvestmentReturn) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteInvestmentReturn(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteInvestmentReturn(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer id) {
         Optional<InvestmentReturn> investmentReturn = investmentReturnService.findById(id);
         if (investmentReturn.isPresent()) {
             investmentReturnService.deleteById(id);
@@ -47,7 +55,9 @@ public class InvestmentReturnController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<InvestmentReturn>> findById(@PathVariable int id) {
+    public ResponseEntity<Optional<InvestmentReturn>> findById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable int id) {
         Optional<InvestmentReturn> investmentReturn = investmentReturnService.findById(id);
         if (investmentReturn != null) {
             return ResponseEntity.ok(investmentReturn);

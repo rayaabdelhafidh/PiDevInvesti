@@ -70,6 +70,8 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
                     existingInvestment.setInvestmentDate(newInvestment.getInvestmentDate());
                     existingInvestment.setDescriptionInvest(newInvestment.getDescriptionInvest());
                     existingInvestment.setStatusInvest(newInvestment.getStatusInvest());
+                    existingInvestment.setInvestmentProgress(newInvestment.getInvestmentProgress());
+
                     return investmentRepository.save(existingInvestment);
                 }).orElse(null);
     }
@@ -78,6 +80,12 @@ public class InvestmentService implements IInvestmentService<Investment, Integer
     public List<Investment> findAll() {
         return investmentRepository.findAll();
     }
+
+    @Override
+    public Investment findByProject(int idProject) {
+        return investmentRepository.findByProject_ProjectId(idProject);
+    }
+
 
     @Override
     public void deleteById(Integer id) {

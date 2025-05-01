@@ -22,25 +22,33 @@ public class ProjectController {
     private ProjectService projectService;
 
     @PostMapping("/add")
-    public ResponseEntity<Project> addProject(@RequestBody Project project) {
+    public ResponseEntity<Project> addProject(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Project project) {
         Project savedProject = projectService.add(project);
         return ResponseEntity.ok(savedProject);
     }
 
     @GetMapping
-    public ResponseEntity<List<Project>> getAllProjects() {
+    public ResponseEntity<List<Project>> getAllProjects(
+            @RequestHeader("Authorization") String token
+            ) {
         List<Project> projects = projectService.findAll();
         return ResponseEntity.ok(projects);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Project> updateProject(@PathVariable Integer id, @RequestBody Project project) {
+    public ResponseEntity<Project> updateProject(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer id, @RequestBody Project project) {
         Project updatedProject = projectService.update(id, project);
         return (updatedProject != null) ? ResponseEntity.ok(updatedProject) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteProject(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteProject(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer id) {
         Optional<Project> project = projectService.findById(id);
         if (project.isPresent()) {
             projectService.deleteById(id);
@@ -51,7 +59,9 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Project>> findById(@PathVariable int id) {
+    public ResponseEntity<Optional<Project>> findById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable int id) {
         Optional<Project> project = projectService.findById(id);
         if (project != null) {
             return ResponseEntity.ok(project);
@@ -59,24 +69,32 @@ public class ProjectController {
         return null;
     }
     @PutMapping("/dessignInvestToProject/{idProject}")
-    public void dessignInvestmentToProject(@PathVariable("idProject")  int idProject)
+    public void dessignInvestmentToProject(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("idProject")  int idProject)
     {
         Project project=projectService.desaffetcterInvestmentsToProject(idProject);
     }
 
     @GetMapping("/CalculateTotalInvestments/{idProject}")
-    public BigDecimal calculateTotalInvestment(@PathVariable("idProject")  int idProject)
+    public BigDecimal calculateTotalInvestment(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("idProject")  int idProject)
     {
         return projectService.calculateTotalInvestment(idProject);
     }
 
     @GetMapping("/getRelatedInvestmentReturns/{idProject}")
-    public List<InvestmentReturn> getRelatedInvestmentReturns(@PathVariable("idProject")  int idProject)
+    public List<InvestmentReturn> getRelatedInvestmentReturns(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("idProject")  int idProject)
     {
         return projectService.getRelatedInvestmentReturns(idProject);
     }
     @GetMapping("/analytics/projects/{id}")
-    public ResponseEntity<Map<String, Object>> getProjectAnalytics(@PathVariable int id) {
+    public ResponseEntity<Map<String, Object>> getProjectAnalytics(
+            @RequestHeader("Authorization") String token,
+            @PathVariable int id) {
         Map<String, Object> analytics = projectService.getProjectAnalytics(id);
         return ResponseEntity.ok(analytics);
     }

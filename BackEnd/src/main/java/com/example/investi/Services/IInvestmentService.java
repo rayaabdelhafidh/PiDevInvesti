@@ -22,5 +22,6 @@ public interface IInvestmentService <Investment,ID>{
     Investment Invest(long owner_id, BigDecimal amount_invested,Integer project_id)/*throws MessagingException*/;
     List<Investment> findByStatus(StatusInvest status);
 
+    Investment findByProject(int idProject);
 
     }

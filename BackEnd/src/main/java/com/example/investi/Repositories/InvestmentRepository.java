@@ -16,4 +16,6 @@ public interface InvestmentRepository extends JpaRepository<Investment, Integer>
     @Query("SELECT i FROM Investment i JOIN i.project p")
     List<Investment> findAllInvestmentsWithProjects();
     List<Investment> findByProject(Project project);
+    Investment findByProject_ProjectId(int idProject);
+
 }

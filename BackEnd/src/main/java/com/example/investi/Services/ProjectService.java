@@ -52,6 +52,11 @@ public class ProjectService implements IProjectService<Project, Integer> {
                     existingPorject.setProjectName(newProject.getProjectName());
                     existingPorject.setAmountNeeded(newProject.getAmountNeeded());
                     existingPorject.setStartDate(newProject.getStartDate());
+                    existingPorject.setHistoricalROI(newProject.getHistoricalROI());
+                    existingPorject.setProjectStatus(newProject.getProjectStatus());
+                    existingPorject.setRiskLevel(newProject.getRiskLevel());
+                    existingPorject.setProjectDuration(newProject.getProjectDuration());
+
                     return projectRepository.save(existingPorject);
                 }).orElse(null);
     }
